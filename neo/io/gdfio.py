@@ -7,7 +7,7 @@ Depends on: numpy, quantities
 Supported: Read
 
 Usage:
-One can read just a single spiketrain with a certain ID from a file
+One can read just a single spike train with a certain ID from a file
 by using read_spiketrain.
     >>> from neo.io import gdfio
     >>> r = gdfio.GdfIO(filename='example_data.gdf')
@@ -18,14 +18,14 @@ by using read_spiketrain.
     {'id': 8}
 
 It is also possible to provide additional annotations for the spiketrain
-upon loading the spiketrain
+upon loading the spiketrain.
     >>> st = r.read_spiketrain(gdf_id=1, t_start=0.*pq.ms, t_stop=1000.*pq.ms,
                                layer='L6', population='E')
     >>> print(st.annotations)
     {'layer': 'L6', 'id': 1, 'population': 'E'}
 
-One can read multiple spiketrain from a file by passing a list of
-IDs to read_segment
+One can read multiple spike trains from a file by passing a list of
+IDs to read_segment.
     >>> st = r.read_segment(gdf_id_list=[1,6,8], t_start=0.*pq.ms,
                             t_stop=1000.*pq.ms)
     >>> print(st.spiketrains)
@@ -34,8 +34,8 @@ IDs to read_segment
      <SpikeTrain(array([ 370.6, 764.7]) * ms, [0.0 ms, 1000.0 ms])>]
 
 
-It is also possible to retrieve spiketrains from a file for all neurons
-with at least one spike in the defined period
+It is also possible to retrieve spike trains from a file for all neurons
+with at least one spike in the defined period.
     >>> st = r.read_segment(gdf_id_list=[], t_start=0.*pq.ms,
                             t_stop=1000.*pq.ms)
     [<SpikeTrain(array([ 411.]) * ms, [0.0 ms, 1000.0 ms])>,
@@ -45,7 +45,7 @@ with at least one spike in the defined period
      <SpikeTrain(array([ 370.6,  764.7]) * ms, [0.0 ms, 1000.0 ms])>]
 
 
-Authors: Julia Sprenger, Maximilian Schmidt, Johanna Senk, Jakob Jordan
+Authors: Julia Sprenger, Johanna Senk, Maximilian Schmidt, Jakob Jordan
 
 """
 
@@ -63,10 +63,10 @@ class GdfIO(BaseIO):
 
     """
     Class for reading GDF files, e.g., the spike output of NEST. It handles
-    opening the gdf file and reading segements or single spiketrains.
+    opening the GDF file and reading segements or single spiketrains.
     """
 
-    # This class can only read data
+    # this class can only read data
     is_readable = True
     is_writable = False
 
@@ -80,6 +80,7 @@ class GdfIO(BaseIO):
     extensions = ['gdf']
     mode = 'file'
 
+
     def __init__(self, filename=None):
         """
         Parameters
@@ -89,6 +90,7 @@ class GdfIO(BaseIO):
         """
         BaseIO.__init__(self, filename=filename)
 
+
     def __read_spiketrains(self, gdf_id_list, time_unit,
                            t_start, t_stop, id_column,
                            time_column, **args):
@@ -96,7 +98,7 @@ class GdfIO(BaseIO):
         Internal function called by read_spiketrain() and read_segment().
         """
 
-        # assert that there are spike times in the file
+        # assert that the file contains spike times
         if time_column is None:
             raise ValueError('Time column is None. No spike times to '
                              'be read in.')
@@ -105,7 +107,7 @@ class GdfIO(BaseIO):
             raise ValueError('No neuron IDs specified but file contains '
                              'neuron IDs in column ' + str(id_column) + '.'
                              ' Specify empty list to retrieve'
-                             ' spiketrains of all neurons.')
+                             ' spike trains of all neurons.')
 
         if gdf_id_list != [None] and id_column is None:
             raise ValueError('Specified neuron IDs to '
@@ -156,7 +158,7 @@ class GdfIO(BaseIO):
                         time_unit).magnitude,
                     data[:, time_column] < t_stop.rescale(time_unit).magnitude))]
 
-        # create a list of SpikeTrains for all neuron IDs in gdf_id_list.
+        # create a list of SpikeTrains for all neuron IDs in gdf_id_list
         # assign spike times to neuron IDs if id_column is given
         if id_column is not None:
             if gdf_id_list == []:
@@ -179,15 +181,16 @@ class GdfIO(BaseIO):
                     t_start=t_start, t_stop=t_stop,
                     id=nid, **args))
 
+        # if id_column is not given, all spike times are collected in one
+        # spike train with id=None
         else:
-            # if id_column is not given, all spike times are collected in one
-            # spike train with id=None
             train = data[:, time_column]
             spiketrain_list = [SpikeTrain(train, units=time_unit,
                                           t_start=t_start, t_stop=t_stop,
                                           id=None, **args)]
 
         return spiketrain_list
+
 
     def read_segment(self, lazy=False, cascade=True,
                      gdf_id_list=None, time_unit=pq.ms, t_start=None,
@@ -201,17 +204,17 @@ class GdfIO(BaseIO):
         lazy : bool, optional, default: False
         cascade : bool, optional, default: True
         gdf_id_list : list or tuple, default: None
-            Can be either list of GDF IDs of which to return SpikeTrain(s) or
-            a tuple specifying the range (includes boundaries [start, stop])
-            of GDF IDs. Must be specified if the GDF file contains neuron
-            IDs, the default None then raises an error. Specify an empty
+            Can be either a list of GDF IDs of which to return SpikeTrain(s) or
+            a tuple specifying the range including the boundary values of
+            GDF IDs: (start, stop). Must be specified if the GDF file contains
+            neuron IDs, the default None then raises an error. Specify an empty
             list [] to retrieve the spike trains of all neurons with at least
             one spike.
         time_unit : Quantity (time), optional, default: quantities.ms
             The time unit of recorded time stamps.
         t_start : Quantity (time), default: None
-            Start time of SpikeTrain. t_start must be specified, the default None
-            raises an error.
+            Start time of SpikeTrain. t_start must be specified, the default
+            None raises an error.
         t_stop : Quantity (time), default: None
             Stop time of SpikeTrain. t_stop must be specified, the default None
             raises an error.
@@ -223,12 +226,14 @@ class GdfIO(BaseIO):
         Returns
         -------
         seg : Segment
-            The Segment contains one SpikeTrain for each ID in gdf_id_list.
+            The Segment contains one SpikeTrain for each ID as specified in
+            gdf_id_list.
         """
 
         if isinstance(gdf_id_list, tuple):
             if gdf_id_list[0] > gdf_id_list[1]:
-                raise ValueError('second entry in range should be smaller or equal to first entry.')
+                raise ValueError('second entry in range should be '
+                                 'greater or equal to first entry.')
             gdf_id_list = range(gdf_id_list[0], gdf_id_list[1] + 1)
 
         # __read_spiketrains() needs a list of IDs
@@ -245,12 +250,13 @@ class GdfIO(BaseIO):
 
         return seg
 
+
     def read_spiketrain(
             self, lazy=False, cascade=True, gdf_id=None,
             time_unit=pq.ms, t_start=None, t_stop=None,
             id_column=0, time_column=1, **args):
         """
-        Read SpikeTrain with specified neuron ID from the GDF data.
+        Read a SpikeTrain with specified neuron ID from the GDF data.
 
         Parameters
         ----------
@@ -278,7 +284,7 @@ class GdfIO(BaseIO):
         """
 
         if (not isinstance(gdf_id, int)) and gdf_id is not None:
-            raise ValueError('gdf_id has to be of type int or None')
+            raise ValueError('gdf_id has to be of type int or None.')
 
         if gdf_id is None and id_column is not None:
             raise ValueError('No neuron ID specified but file contains '
@@ -289,6 +295,3 @@ class GdfIO(BaseIO):
                                        t_start, t_stop,
                                        id_column, time_column,
                                        **args)[0]
-        
-
-# TODO check documentation
