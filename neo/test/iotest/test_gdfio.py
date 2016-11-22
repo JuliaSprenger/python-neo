@@ -34,8 +34,8 @@ class TestGdfIO(BaseTestIO, unittest.TestCase):
         r = GdfIO(filename='gdf_test_files/withgidF-time_in_stepsF-1254-0.gdf')
         r.read_spiketrain(t_start=0.*pq.ms, t_stop=1000.*pq.ms, lazy=False,
                           id_column=None, time_column=0)
-        r.read_segment(t_start=0.*pq.ms, t_stop=1000.*pq.ms, lazy=False, id_column=None,
-                       time_column=0)
+        r.read_segment(t_start=0.*pq.ms, t_stop=1000.*pq.ms, lazy=False,
+                       id_column=None, time_column=0)
 
         r = GdfIO(filename='gdf_test_files/withgidF-time_in_stepsT-1256-0.gdf')
         r.read_spiketrain(t_start=0.*pq.ms, t_stop=1000.*pq.ms,
@@ -46,16 +46,18 @@ class TestGdfIO(BaseTestIO, unittest.TestCase):
                        id_column=None, time_column=0)
 
         r = GdfIO(filename='gdf_test_files/withgidT-time_in_stepsF-1255-0.gdf')
-        r.read_spiketrain(gdf_id=1, t_start=0.*pq.ms, t_stop=1000.*pq.ms, lazy=False,
-                          id_column=0, time_column=1)
+        r.read_spiketrain(gdf_id=1, t_start=0.*pq.ms, t_stop=1000.*pq.ms,
+                          lazy=False, id_column=0, time_column=1)
         r.read_segment(gdf_id_list=[1], t_start=0.*pq.ms, t_stop=1000.*pq.ms,
                        lazy=False, id_column=0, time_column=1)
 
         r = GdfIO(filename='gdf_test_files/withgidT-time_in_stepsT-1257-0.gdf')
-        r.read_spiketrain(gdf_id=1, t_start=0.*pq.ms, t_stop=1000.*pq.ms, lazy=False,
+        r.read_spiketrain(gdf_id=1, t_start=0.*pq.ms, t_stop=1000.*pq.ms, 
+                          time_unit=pq.CompoundUnit('0.1*ms'), lazy=False,
                           id_column=0, time_column=1)
         r.read_segment(gdf_id_list=[1], t_start=0.*pq.ms, t_stop=1000.*pq.ms,
-                       lazy=False, id_column=0, time_column=1)
+                       time_unit=pq.CompoundUnit('0.1*ms'), lazy=False,
+                       id_column=0, time_column=1)
 
     def test_read_integer(self):
         '''
@@ -63,11 +65,25 @@ class TestGdfIO(BaseTestIO, unittest.TestCase):
         are stored in time steps in the file.
         '''
 
+        r = GdfIO(filename='gdf_test_files/withgidF-time_in_stepsT-1256-0.gdf')
+        st = r.read_spiketrain(gdf_id=None, t_start=0.*pq.ms, t_stop=1000.*pq.ms,
+                               time_unit=pq.CompoundUnit('0.1*ms'),
+                               lazy=False, id_column=None, time_column=0)
+        self.assertTrue(st.magnitude.dtype == np.int32)
+        seg = r.read_segment(gdf_id_list=[None], t_start=0.*pq.ms, t_stop=1000.*pq.ms,
+                             time_unit=pq.CompoundUnit('0.1*ms'),
+                             lazy=False, id_column=None, time_column=0)
+        sts = seg.spiketrains
+        self.assertTrue(all([st.magnitude.dtype == np.int32 for st in sts]))
+
+
         r = GdfIO(filename='gdf_test_files/withgidT-time_in_stepsT-1257-0.gdf')
         st = r.read_spiketrain(gdf_id=1, t_start=0.*pq.ms, t_stop=1000.*pq.ms,
+                               time_unit=pq.CompoundUnit('0.1*ms'),
                                lazy=False, id_column=0, time_column=1)
         self.assertTrue(st.magnitude.dtype == np.int32)
         seg = r.read_segment(gdf_id_list=[1], t_start=0.*pq.ms, t_stop=1000.*pq.ms,
+                             time_unit=pq.CompoundUnit('0.1*ms'),
                              lazy=False, id_column=0, time_column=1)
         sts = seg.spiketrains
         self.assertTrue(all([st.magnitude.dtype == np.int32 for st in sts]))
