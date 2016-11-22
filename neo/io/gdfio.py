@@ -146,10 +146,6 @@ class GdfIO(BaseIO):
             raise ValueError('File does not contain neuron IDs but '
                              'id_column specified to ' + str(id_column) + '.')
 
-        # get neuron gdf_id_list
-        if gdf_id_list == []:
-            gdf_id_list = np.unique(data[:, id_column]).astype(int)
-
         # get consistent dimensions of data
         if len(data.shape) < 2:
             data = data.reshape((-1, 1))
@@ -160,19 +156,37 @@ class GdfIO(BaseIO):
                         time_unit).magnitude,
                     data[:, time_column] < t_stop.rescale(time_unit).magnitude))]
 
-        # create an empty list of spike trains and fill in the trains for each
-        # GDF ID in gdf_id_list
-        spiketrain_list = []
-        for i in gdf_id_list:
-            # find the spike times for each neuron ID
-            if id_column is not None:
-                train = data[np.where(data[:, id_column] == i)][:, time_column]
+        # create a list of SpikeTrains for all neuron IDs in gdf_id_list.
+        # assign spike times to neuron IDs if id_column is given
+        if id_column is not None:
+            if gdf_id_list == []:
+                gdf_id_list = np.unique(data[:, id_column]).astype(int)
+                full_gdf_id_list = gdf_id_list
             else:
-                train = data[:, time_column]
-            # create SpikeTrain objects and annotate them with the neuron ID
-            spiketrain_list.append(SpikeTrain(
-                train, units=time_unit, t_start=t_start, t_stop=t_stop,
-                id=i, **args))
+                full_gdf_id_list = \
+                    np.unique(np.append(data[:, id_column].astype(int),
+                                        np.asarray(gdf_id_list)))
+
+            stdict = {i:[] for i in full_gdf_id_list}
+
+            for i,nid in enumerate(data[:, id_column]):
+                stdict[nid].append(data[i, time_column])
+
+            spiketrain_list = []
+            for nid in gdf_id_list:
+                spiketrain_list.append(SpikeTrain(
+                    np.array(stdict[nid]), units=time_unit,
+                    t_start=t_start, t_stop=t_stop,
+                    id=nid, **args))
+
+        else:
+            # if id_column is not given, all spike times are collected in one
+            # spike train with id=None
+            train = data[:, time_column]
+            spiketrain_list = [SpikeTrain(train, units=time_unit,
+                                          t_start=t_start, t_stop=t_stop,
+                                          id=None, **args)]
+
         return spiketrain_list
 
     def read_segment(self, lazy=False, cascade=True,
