@@ -13,27 +13,30 @@ Authors: Julia Sprenger, Maximilian Schmidt, Johanna Senk
 # needed for python 3 compatibility
 from __future__ import absolute_import
 
+import os.path
+import warnings
 import numpy as np
 import quantities as pq
 
+from neo.io.baseio import BaseIO
 from neo.io import GdfIO
 from neo.core import Segment, SpikeTrain, AnalogSignalArray
 
-value_types = {'V': pq.mV,
-               'I': pq.pA,
-               'g': pq.CompoundUnit("10^-9*S")}
+value_type_dict = {'V': pq.mV,
+                   'I': pq.pA,
+                   'g': pq.CompoundUnit("10^-9*S"),
+                   'no type': pq.dimensionless}
 
 
-class NestIO(GdfIO):
-
+class NestIO(BaseIO):
     """
     Class for reading GDF files, e.g., the spike output of NEST.
     TODO 
     Usage:
         TODO
     """
-    
-    is_readable = True # This class can only read data
+
+    is_readable = True  # This class can only read data
     is_writable = False
 
     supported_objects = [SpikeTrain, AnalogSignalArray]
@@ -49,156 +52,269 @@ class NestIO(GdfIO):
     extensions = ['gdf', 'dat']
     mode = 'file'
 
-
-    def __init__(self, filename=None):
+    def __init__(self, filenames=None):
         """
         Parameters
         ----------
-            filename: string, default=None
-                The filename.
+            filenames: string or list of strings, default=None
+                The filename or list of filenames to load.
         """
-        GdfIO.__init__(self, filename)
-        self.filename = filename
+        if isinstance(filenames,str):
+            filenames = [filenames]
+
+        self.filenames = filenames
+        self.avail_formats = {}
+        self.avail_IOs = {}
+
+        for filename in filenames:
+            path, ext = os.path.splitext(filename)
+            ext = ext.strip('.')
+            if ext in self.extensions:
+                if ext in self.avail_IOs:
+                    raise ValueError('Received multiple files with "%s" '
+                                     'extention. Can only load single file of '
+                                     'this type' % ext)
+                self.avail_IOs[ext] = ColumnIO(filename)
+            self.avail_formats[ext] = path
 
 
-    def __read_analogsinalarrays(self, gid_list, time_unit, t_start,
-                                 t_stop, sampling_period=None,
+    def __read_analogsinalarrays(self, gid_list, time_unit, t_start=None,
+                                 t_stop=None, sampling_period=None,
                                  id_column=0, time_column=1,
-                                 value_column=2, value_type=None,
-                                 value_unit=None):
+                                 value_columns=2, value_types=None,
+                                 value_units=None, lazy=False, cascade=True):
         """
         Internal function called by read_analogsignalarray() and read_segment().
         """
 
-        # load GDF data
-        f = open(self.filename)
-        # read the first line to check the data type (int or float) of the spike
-        # times, assuming that only the column of time stamps may contain floats
-        line = f.readline()
-        if '.' not in line:
-            data = np.loadtxt(self.filename, dtype=np.int32)
-        else:
-            data = np.loadtxt(self.filename, dtype=np.float)
+        # # check loaded data and given arguments
+        # if len(data.shape) < 2 and id_column is not None:
+        #     raise ValueError('File does not contain neuron IDs but '
+        #                      'id_column specified to %s.' % str(id_column))
 
 
-        # check loaded data and given arguments
-        if len(data.shape) < 2 and id_column is not None:
-            raise ValueError('File does not contain neuron IDs but '
-                             'id_column specified to '+str(id_column)+'.')
+        if 'dat' not in self.avail_formats:
+            raise ValueError('Can not load analogsignalarrays. No dat file '
+                             'provided.')
 
-        if time_column is None:
-            raise ValueError('No time column provided.')
+        if gid_list is None:
+            gid_list = [gid_list]
 
-        if value_column is None:
+        if value_columns is None:
             raise ValueError('No value column provided.')
+        if isinstance(value_columns, int):
+            value_columns = [value_columns]
+        if value_types is None:
+            value_types = ['no type']*len(value_columns)
+        elif isinstance(value_types,str):
+            value_types = [value_types]
 
-        if value_type is not None and value_type.split('_')[0] in value_types:
-            value_unit = value_types[value_type.split('_')[0]]
-        elif not isinstance(value_unit, pq.UnitQuantity):
+
+        # translating value types into units as far as possible
+        if value_units is None:
+            short_value_types = [vtype.split('_')[0] for vtype in value_types]
+            if not all([svt in value_type_dict for svt in short_value_types]):
+                raise ValueError('Can not interpret value types '
+                                 '"%s"'%value_types)
+            value_units = [value_type_dict[svt] for svt in short_value_types]
+
+        # checking for same number of value types, units and columns
+        if not(len(value_types) == len(value_units) == len(value_columns)):
+            raise ValueError('Length of value types, units and columns does '
+                             'not match (%i,%i,%i)' % (len(value_types),
+                                                       len(value_units),
+                                                       len(value_columns)))
+
+        # defining standard column order for interal usage
+        # [id_column, time_column, value_column1, value_column2, ...]
+        column_ids = [id_column,time_column] + value_columns
+        for i, id in enumerate(column_ids):
+            if id is None:
+                column_ids[i] = -1
+
+        if not all([isinstance(vunit, pq.UnitQuantity) for vunit in
+                    value_units]):
             raise ValueError('No value unit or standard value type specified.')
 
         if None in gid_list and id_column is not None:
             raise ValueError('No neuron IDs specified but file contains '
-                             'neuron IDs in column '+str(id_column)+'.'
-                             ' Specify empty list to ' 'retrieve'
-                             ' spiketrains of all neurons.')
+                             'neuron IDs in column %s. Specify empty list to '
+                             'retrieve spiketrains of all neurons.'
+                             '' % str(id_column))
 
         if gid_list != [None] and id_column is None:
-            raise ValueError('Specified neuron IDs to '
-                             'be '+str(gid_list)+','
-                             ' but no ID column specified.')
+            raise ValueError('Specified neuron IDs to be %s, but no ID column '
+                             'specified.' % gid_list)
 
+        # checking input times
         if t_stop is None:
-            raise ValueError('No t_stop specified.')
+            t_stop = np.inf * pq.s
+        if t_start is None:
+            t_start = -np.inf * pq.s
 
-        if not isinstance(t_stop, pq.quantity.Quantity):
-            raise TypeError('t_stop (%s) is not a quantity.'%(t_stop))
-
-        if t_start is not None and not isinstance(t_start, pq.quantity.Quantity):
-            raise TypeError('t_start (%s) is not a quantity.'%(t_start))
+        for time in (t_start, t_stop):
+            if not isinstance(time, pq.quantity.Quantity):
+                raise TypeError('Time value (%s) is not a quantity.' % (time))
 
         # assert that no single column is assigned twice
-        column_list = [id_column, time_column, value_column]
+        column_list = [id_column, time_column] + value_columns
         if len(np.unique(column_list)) < 3:
-            raise ValueError('1 or more columns have been specified to '
-            'contain the same data. Columns were specified to '
-            '%s.'%(column_list))
+            raise ValueError('1 or more columns have been specified to contain '
+                             'the same data. Columns were specified to %s.'
+                             '' % column_list)
 
-        # get neuron gid_list
-        if gid_list == []:
-            gid_list = np.unique(data[:, id_column]).astype(int)
+        condition, condition_column = None, None
+        sorting_column = []
+        if ((gid_list is not [None]) and (gid_list is not None)):
+            if gid_list != []:
+                condition = lambda x: x in gid_list
+                condition_column = id_column
+            sorting_column.append(0) # Sorting according to gids first
+        if time_column is not None:
+            sorting_column.append(1) # Sorting according to time
+        if sorting_column == []:
+            sorting_column = None
+        else:
+            sorting_column = sorting_column[::-1]
+
+        data = self.avail_IOs['dat'].get_columns(
+                column_ids=column_ids,
+                condition=condition,
+                condition_column=condition_column,
+                sorting_columns=sorting_column # Time column
+                )
+
+        # # get neuron gid_list
+        # if gid_list is not None and not gid_list: # if gid_list is empty
+        #     # sequence
+        #     gid_list = np.unique(data[:, id_column]).astype(int)
 
         # determine sampling_period from data if not specified
         if sampling_period is None:
-            # Take times of first neuron for simplicity
-            times = data[np.where(data[:, id_column] ==
-                                      data[:, id_column][0])][:, time_column]
-            # Could be inaccurate because of floats
-            dt = times[1]-times[0]
-            sampling_period = pq.CompoundUnit(str(dt)+'*'+time_unit.units.u_symbol)
+            # # Old version
+            # # Take times of first neuron for simplicity
+            # times = data[np.where(data[:, id_column] ==
+            #                       data[:, id_column][0])][:, time_column]
+            # # Could be inaccurate because of floats
+            # dt = times[1] - times[0]
+            if time_column is not None:
+                data_sampling = np.unique(np.diff(sorted(np.unique(data[:,1]))))
+                if len(data_sampling)>1:
+                    raise ValueError('Different sampling distances found in '
+                                     'data set (%s)'%data_sampling)
+                else:
+                    dt = data_sampling[0]
+            else:
+                raise ValueError('Can not estimate sampling rate without time '
+                                 'column id provided.')
+            sampling_period = pq.CompoundUnit(str(dt) + '*'
+                                              + time_unit.units.u_symbol)
         elif not isinstance(sampling_period, pq.UnitQuantity):
-                raise ValueError("sampling_period is not specified as a unit.")
+            raise ValueError("sampling_period is not specified as a unit.")
 
-        # set t_start equal to sampling_period because NEST starts
-        # recording only after 1 sampling_period
-        if t_start is None:
-            t_start = 1.*sampling_period
-
-        if t_start.rescale(sampling_period).magnitude < sampling_period.magnitude:
-            raise ValueError("t_start specified to be smaller than 1 "
-                             "sampling_period. NEST starts recording after 1 "
-                             "sampling_period.")
-
-        # use only data from the time interval between t_start and t_stop
-        data = data[np.where(np.logical_and(data[:, time_column] >=
-                                            t_start.rescale(time_unit).magnitude,
-                                            data[:, time_column] <
-                                            t_stop.rescale(time_unit).magnitude))]
+        # if t_start.rescale(
+        #         sampling_period).magnitude < sampling_period.magnitude:
+        #     raise ValueError("t_start specified to be smaller than 1 "
+        #                      "sampling_period. NEST starts recording after 1 "
+        #                      "sampling_period.")
+        #
+        # # use only data from the time interval between t_start and t_stop
+        # data = data[np.where(np.logical_and(data[:, time_column] >=
+        #                                     t_start.rescale(
+        #                                         time_unit).magnitude,
+        #                                     data[:, time_column] <
+        #                                     t_stop.rescale(
+        #                                         time_unit).magnitude))]
+        #
+        # # extraction location of gids to facilitate data access
+        # full_gid_list = np.unique(np.append(data[:, id_column].astype(int),
+        #                         np.asarray(gid_list)))
+        #
+        # time_dict = {i:[] for i in full_gid_list}
+        # value_dict = {i:[] for i in full_gid_list}
+        #
+        # for i,nid in enumerate(data[:, id_column]):
+        #     time_dict[nid].append(data[i, time_column])
+        #     value_dict[nid].append(data[i,value_column])
 
         # create an empty list of signals and fill in the signals for each
         # GID in gid_list
         analogsignal_list = []
-        for i in gid_list:
+
+
+        if not lazy:
+
+            if (gid_list == []) and id_column is not None:
+                gid_list = np.unique(data[:,id_column])
+
             # find the signal for each neuron ID
-            if id_column is not None:
-                signal = data[np.where(data[:, id_column] == i)][:, value_column]
-                times = data[np.where(data[:, id_column] == i)][:, time_column]
-            else:
-                signal = data[:, value_column]
-                times = data[:, time_column]
-            
-            if id_column is None and len(np.unique(times)) < len(times):
-                raise ValueError('No ID column specified but recorded '
-                                 'from multiple neurons.')
+            for i in gid_list:
+                gid_ids = np.array([0,data.shape[0]])
+                if id_column is not None:
+                    gid_ids = np.array([np.searchsorted(data[:,0],i,side='left'),
+                                       np.searchsorted(data[:,0],i,side='right')])
+                gid_data = data[gid_ids[0]:gid_ids[1],:]
+                # times = data[:, 1]
 
-           
-            # check if signal has the correct length
-            assert(len(signal) ==
-                   t_stop.rescale(sampling_period).magnitude -
-                   t_start.rescale(sampling_period).magnitude)
+                # select only requested time range
+                id_shifts = np.array([0,0])
+                if time_column is not None:
+                    id_shifts[0] = np.searchsorted(gid_data[:,1],
+                                                   t_start.rescale(time_unit).magnitude,
+                                                   side='left')
+                    id_shifts[1] = (np.searchsorted(gid_data[:,1],
+                                                   t_stop.rescale(time_unit).magnitude,
+                                                   side='left')
+                                    - gid_data.shape[0])
 
-            # create AnalogSinalArray objects and annotate them with the neuron ID
-            analogsignal_list.append(AnalogSignalArray(signal*value_unit,
-                                                       sampling_period=sampling_period,
-                                                       t_start=t_start,
-                                                       annotations={'id':
-                                                                    i, 'type' :
-                                                                    value_type}))
+                selected_ids = gid_ids + id_shifts
+                if (time_column is not None) and data.size:
+                    anasig_start_time = data[selected_ids[0], 1] * time_unit
+                else:
+                    # set t_start equal to sampling_period because NEST starts
+                    # recording only after 1 sampling_period
+                    anasig_start_time = 1. * sampling_period
+
+                for v_id, value_column in enumerate(value_columns):
+                    signal = data[selected_ids[0]:selected_ids[1], value_column]
+
+                    # create AnalogSinalArray objects and annotate them with the
+                    # neuron ID
+                    analogsignal_list.append(AnalogSignalArray(
+                                                signal * value_units[v_id],
+                                                sampling_period=sampling_period,
+                                                t_start=anasig_start_time,
+                                                annotations={'id':i,
+                                                            'type':value_types[v_id]}))
+
+                    assert (analogsignal_list[-1].t_stop ==
+                            anasig_start_time + len(signal) * sampling_period)
+
+                # signal = value_dict[i]
+                # times = time_dict[i]
+            # else:
+            #     signal = data[:, value_column] # TODO: this needs to be sorted, right?
+            #     times = data[:, time_column]
+
+            # if id_column is None and len(np.unique(times)) < len(times):
+            #     raise ValueError('No ID column specified but recorded '
+            #                      'from multiple neurons.')
+
+
+
 
         return analogsignal_list
-        
-    def read_segment(self, lazy=False, cascade=True, gid_list=None,
-                     time_unit=pq.ms, t_start=None, t_stop=None,
-                     sampling_period=None, id_column=0, time_column=1,
-                     value_column=2, value_type=None, value_unit=None):
+
+    def read_segment(self, gid_list=None, time_unit=pq.ms, t_start=None,
+                     t_stop=None, sampling_period=None, id_column=0,
+                     time_column=1, value_columns=2, value_types=None,
+                     value_units=None, lazy=False, cascade=True):
         """
         Read a Segment which contains SpikeTrain(s) with specified neuron IDs
         from the GDF data.
 
         Parameters
         ----------
-        lazy : bool, optional, default: False
-        cascade : bool, optional, default: True
         gid_list : list, default: None
             A list of GDF IDs of which to return SpikeTrain(s). gid_list must
             be specified if the GDF file contains neuron IDs, the default None
@@ -211,41 +327,73 @@ class NestIO(GdfIO):
         t_stop : Quantity (time), default: None
             Stop time of SpikeTrain. t_stop must be specified, the default None
             raises an error.
+        sampling_period : Quantity (frequency), optional, default: None
+            Sampling period of the recorded data.
         id_column : int, optional, default: 0
             Column index of neuron IDs.
         time_column : int, optional, default: 1
             Column index of time stamps.
+        value_column : int, optional, default: 2
+            Column index of the analog values recorded.
+        value_type : str, optional, default: None
+            Nest data type of the analog values recorded, eg.'V_m', 'I', 'g_e'
+        value_unit : Quantity (amplitude), default: None
+            The physical unit of the recorded signal values
+        lazy : bool, optional, default: False
+        cascade : bool, optional, default: True
 
         Returns
         -------
         seg : Segment
-            The Segment contains one SpikeTrain for each ID in gid_list.      
+            The Segment contains one SpikeTrain and one AnalogSignalArray for
+            each ID in gid_list.
         """
 
         # __read_spiketrains() needs a list of IDs
         if gid_list is None:
             gid_list = [None]
 
-        # create an empty Segment and fill in the spike trains
+        # create an empty Segment
         seg = Segment()
-        seg.analogsignalarrays = self.__read_analogsinalarrays(gid_list,
-                                                        time_unit, t_start,
-                                                        t_stop,
-                                                        sampling_period=sampling_period,
-                                                        id_column=id_column,
-                                                        time_column=time_column,
-                                                        value_type=value_type,
-                                                        value_unit=value_unit)
+
+        if cascade:
+            ###################################
+            # WARNING: This only works if column structure of gdf and dat
+            # file is
+            # identical
+            ###################################
+            # seg = super(NestIO, self).read_segment(lazy=lazy, cascade=cascade,
+            #                                        gdf_id_list=gid_list,
+            #                                        time_unit=time_unit,
+            #                                        t_start=t_start,
+            #                                        t_stop=t_stop,
+            #                                        id_column=id_column,
+            #                                        time_column=time_column)
+
+            # Load analogsignalarrays and attach to Segment
+            seg.analogsignalarrays = self.__read_analogsinalarrays(
+                    gid_list,
+                    time_unit,
+                    t_start,
+                    t_stop,
+                    sampling_period=sampling_period,
+                    id_column=id_column,
+                    time_column=time_column,
+                    value_columns=value_columns,
+                    value_types=value_types,
+                    value_units=value_units,
+                    lazy=lazy,
+                    cascade=cascade)
 
         return seg
 
-    def read_analogsignalarray( self, lazy=False, cascade=True,
-                                gid=None, time_unit=pq.ms, t_start=None,
-                                t_stop=None, sampling_period=None, id_column=0,
-                                time_column=1, value_column=2, value_type=None,
-                                value_unit=None):
+    def read_analogsignalarray(self, lazy=False, cascade=True,
+                               gid=None, time_unit=pq.ms, t_start=None,
+                               t_stop=None, sampling_period=None, id_column=0,
+                               time_column=1, value_column=2, value_type=None,
+                               value_unit=None):
         """
-        Read SpikeTrain with specified neuron ID from the GDF data.
+        Read AnalogSignalArray with specified neuron ID from the DAT data.
 
         Parameters
         ----------
@@ -281,6 +429,102 @@ class NestIO(GdfIO):
                                              sampling_period=sampling_period,
                                              id_column=id_column,
                                              time_column=time_column,
-                                             value_column=value_column,
-                                             value_type=value_type,
-                                             value_unit=value_unit)[0]
+                                             value_columns=value_column,
+                                             value_types=value_type,
+                                             value_units=value_unit,
+                                             lazy=lazy,
+                                             cascade=cascade)[0]
+
+
+class ColumnIO():
+    def __init__(self, filename):
+
+        self.filename = filename
+
+        # read the first line to check the data type (int or float) of the data
+        f = open(self.filename)
+        line = f.readline()
+
+        additional_parameters = {}
+        if '.' not in line:
+            additional_parameters['dtype'] = np.int32
+
+        self.data = np.loadtxt(self.filename, **additional_parameters)
+
+    def get_columns(self,column_ids=[],condition=None,
+                    condition_column=None, sorting_columns=None):
+        """
+        :param column_ids:
+        :param condition:
+        :param condition_column:
+        :param sorting_columns: Column ids to sort by. In increasing sorting
+        priority!
+        :return:
+        """
+
+        if column_ids == []:
+            column_ids = range(self.data.shape[-1])
+
+        if isinstance(column_ids,(int,float)):
+            column_ids = [column_ids]
+        column_ids = np.array(column_ids)
+
+        if column_ids is not None:
+            if max(column_ids) >= len(self.data) - 1:
+                raise ValueError('Can not load column ID %i. File contains '
+                                 'only %i columns'%(max(column_ids),
+                                                    len(self.data)))
+
+        if sorting_columns is not None:
+            if isinstance(sorting_columns,int):
+                sorting_columns = [sorting_columns]
+            if max(sorting_columns) >= len(self.data) - 1:
+                raise ValueError('Can not sort by column ID %i. File contains '
+                                 'only %i columns'%(max(column_ids),
+                                                    len(self.data)))
+
+        # Starting with whole dataset being selected for return
+        selected_data = self.data
+
+        # Apply filter condition to rows
+        if condition and (condition_column is None):
+            raise ValueError('Filter condition provided, but no '
+                             'condition_column ID provided')
+        elif (condition_column is not None) and (condition is None):
+            warnings.warn('Condition column ID provided, but no condition '
+                          'given. No filtering will be performed.')
+
+        elif (condition is not None) and (condition_column is not None):
+            condition_function = np.vectorize(condition)
+            mask = condition_function(selected_data[:,
+                                      condition_column]).astype(bool)
+
+            selected_data = selected_data[mask,:]
+
+        # Apply sorting if requested
+        if sorting_columns is not None:
+            values_to_sort = selected_data[:,sorting_columns].T
+            ordered_ids = np.lexsort(tuple(values_to_sort[i] for i in
+                                           range(len(values_to_sort))))
+            selected_data = selected_data[ordered_ids,:]
+
+        # Select only requested columns
+        selected_data = np.squeeze(selected_data[:,column_ids])
+
+        return selected_data
+
+
+    # Alternative implementation idea: Index all data rows during
+    # initialization and reimplement get_columns based on this
+
+    # def create_index_for_column(self,column_id):
+    #     if column_id > self.data.shape[1]:
+    #         raise ValueError('Column index out of range of data sets')
+    #
+    #     if column_id not in self.indexed_columns:
+    #         contained_values = np.unique(self.data[:,column_id])
+    #
+    #     else:
+    #         return self.indexed_columns[column_id]
+
+
