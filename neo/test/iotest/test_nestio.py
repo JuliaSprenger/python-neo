@@ -80,19 +80,6 @@ class TestNestIO(BaseTestIO, unittest.TestCase):
                            sampling_period=pq.ms, id_column=None,
                            time_column=0, value_column=1)
 
-        # r = NestIO(filenames='nest_test_files/withgidF-time_in_stepsT-1260-0'
-        #                      '.dat')
-        # with self.assertRaises(ValueError):
-        #     r.read_analogsignalarray(t_stop=1000.*pq.ms,
-        #                              time_unit=pq.CompoundUnit('0.1*ms'),
-        #                              lazy=False, id_column=None,
-        #                              time_column=0, value_column=1)
-        #     r.read_segment(t_stop=1000.*pq.ms,
-        #                    time_unit=pq.CompoundUnit('0.1*ms'), lazy=False,
-        #                    id_column=None, time_column=0, value_column=1)
-
-
-
     def test_values(self):
         '''
         Tests if the function returns the correct values.
@@ -188,6 +175,30 @@ class TestNestIO(BaseTestIO, unittest.TestCase):
         for st in sts:
             self.assertTrue(st.t_start == t_start_targ)
             self.assertTrue(st.t_stop == t_stop_targ)
+
+
+    def test_notimeid(self):
+        r = NestIO(filenames='gdf_nest_test_files/0gid-1time-2gex-1262-0.dat')
+
+        t_start_targ = 450.*pq.ms
+        t_stop_targ = 460.*pq.ms
+        sampling_period = pq.CompoundUnit('5*ms')
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            seg = r.read_segment(gid_list=[], t_start=t_start_targ,
+                                 sampling_period=sampling_period,
+                                 t_stop=t_stop_targ, lazy=False,
+                                 id_column=0, time_column=None,
+                                 value_columns=2, value_types='V_m')
+            # Verify number and content of warning
+            self.assertEqual(len(w),1)
+            self.assertIn ("no time column id",str(w[0].message))
+        sts = seg.analogsignalarrays
+        for st in sts:
+            self.assertTrue(st.t_start == 1*5*pq.ms)
+            self.assertTrue(st.t_stop == len(st)*sampling_period + 1*5*pq.ms)
 
 
 class TestColumnIO(unittest.TestCase):
