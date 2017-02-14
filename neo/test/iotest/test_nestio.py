@@ -27,37 +27,35 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
 
     def test_read_analogsignalarray(self):
         """
-        Tests reading files in the 4 different formats:
-        - with GIDs, with times as floats
-        - with GIDs, with times as integers in time steps
+        Tests reading files in the 2 different formats:
+        - with GIDs, with times, gex and Vm as floats
+        - with GIDs, with times, Vm, Iex and Iin as floats
         """
 
         r = NestIO(filenames=
                    'gdf_nest_test_files/0gid-1time-2gex-3Vm-1261-0.dat',
-                   # 'nest_test_files/withgidT-time_in_stepsF-1259-0.dat'
                    )
-        r.read_analogsignalarray(gid=1, t_stop=1000. * pq.ms,
+        r.read_analogsignalarray(gid=1, t_stop=1000.*pq.ms,
                                  sampling_period=pq.ms, lazy=False,
                                  id_column=0, time_column=1,
                                  value_column=2, value_type='V_m')
-        r.read_segment(gid_list=[1], t_stop=1000. * pq.ms,
-                       sampling_period=pq.ms, lazy=False, id_column=0,
-                       time_column=1, value_columns=2,
+        r.read_segment(gid_list=[1], t_stop=1000.*pq.ms,
+                       sampling_period=pq.ms, lazy=False, id_column_dat=0,
+                       time_column_dat=1, value_columns_dat=2,
                        value_types='V_m')
 
         r = NestIO(filenames=
                    'gdf_nest_test_files/0gid-1time-2Vm-3Iex-4Iin-1263-0.dat',
-                   # 'nest_test_files/withgidT-time_in_stepsT-1261-0.dat'
                    )
-        r.read_analogsignalarray(gid=1, t_stop=1000. * pq.ms,
+        r.read_analogsignalarray(gid=1, t_stop=1000.*pq.ms,
                                  time_unit=pq.CompoundUnit('0.1*ms'),
                                  sampling_period=pq.ms, lazy=False,
                                  id_column=0, time_column=1,
                                  value_column=2, value_type='V_m')
-        r.read_segment(gid_list=[1], t_stop=1000. * pq.ms,
+        r.read_segment(gid_list=[1], t_stop=1000.*pq.ms,
                        time_unit=pq.CompoundUnit('0.1*ms'),
-                       sampling_period=pq.ms, lazy=False, id_column=0,
-                       time_column=1, value_columns=2,
+                       sampling_period=pq.ms, lazy=False, id_column_dat=0,
+                       time_column_dat=1, value_columns_dat=2,
                        value_types='V_m')
 
     def test_id_column_none_multiple_neurons(self):
@@ -72,13 +70,13 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
                    # 'nest_test_files/withgidF-time_in_stepsF-1258-0.dat'
                    )
         with self.assertRaises(ValueError):
-            r.read_analogsignalarray(t_stop=1000. * pq.ms, lazy=False,
+            r.read_analogsignalarray(t_stop=1000.*pq.ms, lazy=False,
                                      sampling_period=pq.ms,
                                      id_column=None, time_column=0,
                                      value_column=1)
-            r.read_segment(t_stop=1000. * pq.ms, lazy=False,
-                           sampling_period=pq.ms, id_column=None,
-                           time_column=0, value_column=1)
+            r.read_segment(t_stop=1000.*pq.ms, lazy=False,
+                           sampling_period=pq.ms, id_column_gdf=None,
+                           time_column_gdf=0)
 
     def test_values(self):
         """
@@ -90,10 +88,10 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
         id_to_test = 1
         r = NestIO(filenames=filename)
         seg = r.read_segment(gid_list=[id_to_test],
-                             t_stop=1000. * pq.ms,
+                             t_stop=1000.*pq.ms,
                              sampling_period=pq.ms, lazy=False,
-                             id_column=0, time_column=1,
-                             value_columns=2, value_types='V_m')
+                             id_column_dat=0, time_column_dat=1,
+                             value_columns_dat=2, value_types='V_m')
 
         dat = np.loadtxt(filename)
         target_data = dat[:, 2][np.where(dat[:, 0] == id_to_test)]
@@ -109,19 +107,19 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
 
         id_list_to_test = range(1, 10)
         seg = r.read_segment(gid_list=id_list_to_test,
-                             t_stop=1000. * pq.ms,
+                             t_stop=1000.*pq.ms,
                              sampling_period=pq.ms, lazy=False,
-                             id_column=0, time_column=1,
-                             value_columns=2, value_types='V_m')
+                             id_column_dat=0, time_column_dat=1,
+                             value_columns_dat=2, value_types='V_m')
 
         self.assertTrue(len(seg.analogsignalarrays) == len(id_list_to_test))
 
         id_list_to_test = []
         seg = r.read_segment(gid_list=id_list_to_test,
-                             t_stop=1000. * pq.ms,
+                             t_stop=1000.*pq.ms,
                              sampling_period=pq.ms, lazy=False,
-                             id_column=0, time_column=1,
-                             value_columns=2, value_types='V_m')
+                             id_column_dat=0, time_column_dat=1,
+                             value_columns_dat=2, value_types='V_m')
 
         self.assertEqual(len(seg.analogsignalarrays), 50)
 
@@ -138,21 +136,21 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
 
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-2gex-1262-0.dat')
         with self.assertRaises(ValueError):
-            r.read_segment(t_stop=1000. * pq.ms, lazy=False,
-                           id_column=0, time_column=1)
+            r.read_segment(t_stop=1000.*pq.ms, lazy=False,
+                           id_column_dat=0, time_column_dat=1)
         with self.assertRaises(ValueError):
             r.read_segment()
         with self.assertRaises(ValueError):
-            r.read_segment(gid_list=[1], t_stop=1000. * pq.ms,
-                           sampling_period=1. * pq.ms, lazy=False,
-                           id_column=0, time_column=1,
-                           value_columns=2, value_types='V_m')
+            r.read_segment(gid_list=[1], t_stop=1000.*pq.ms,
+                           sampling_period=1.*pq.ms, lazy=False,
+                           id_column_dat=0, time_column_dat=1,
+                           value_columns_dat=2, value_types='V_m')
 
         with self.assertRaises(ValueError):
-            r.read_segment(gid_list=[1], t_stop=1000. * pq.ms,
+            r.read_segment(gid_list=[1], t_stop=1000.*pq.ms,
                            sampling_period=pq.ms, lazy=False,
-                           id_column=0, time_column=1,
-                           value_columns=2, value_types='U_mem')
+                           id_column_dat=0, time_column_dat=1,
+                           value_columns_dat=2, value_types='U_mem')
 
             # with self.assertRaises(ValueError):
             #     r.read_segment(gid_list=[1], t_start=0.*pq.ms,
@@ -164,13 +162,13 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
     def test_t_start_t_stop(self):
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-2gex-1262-0.dat')
 
-        t_start_targ = 450. * pq.ms
-        t_stop_targ = 480. * pq.ms
+        t_start_targ = 450.*pq.ms
+        t_stop_targ = 480.*pq.ms
 
         seg = r.read_segment(gid_list=[], t_start=t_start_targ,
                              t_stop=t_stop_targ, lazy=False,
-                             id_column=0, time_column=1,
-                             value_columns=2, value_types='V_m')
+                             id_column_dat=0, time_column_dat=1,
+                             value_columns_dat=2, value_types='V_m')
         sts = seg.analogsignalarrays
         for st in sts:
             self.assertTrue(st.t_start == t_start_targ)
@@ -179,8 +177,8 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
     def test_notimeid(self):
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-2gex-1262-0.dat')
 
-        t_start_targ = 450. * pq.ms
-        t_stop_targ = 460. * pq.ms
+        t_start_targ = 450.*pq.ms
+        t_stop_targ = 460.*pq.ms
         sampling_period = pq.CompoundUnit('5*ms')
 
         with warnings.catch_warnings(record=True) as w:
@@ -189,16 +187,16 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
             seg = r.read_segment(gid_list=[], t_start=t_start_targ,
                                  sampling_period=sampling_period,
                                  t_stop=t_stop_targ, lazy=False,
-                                 id_column=0, time_column=None,
-                                 value_columns=2, value_types='V_m')
+                                 id_column_dat=0, time_column_dat=None,
+                                 value_columns_dat=2, value_types='V_m')
             # Verify number and content of warning
             self.assertEqual(len(w), 1)
             self.assertIn("no time column id", str(w[0].message))
         sts = seg.analogsignalarrays
         for st in sts:
-            self.assertTrue(st.t_start == 1 * 5 * pq.ms)
+            self.assertTrue(st.t_start == 1 * 5*pq.ms)
             self.assertTrue(
-                st.t_stop == len(st) * sampling_period + 1 * 5 * pq.ms)
+                st.t_stop == len(st) * sampling_period + 1 * 5*pq.ms)
 
 
 # class TestNestIOSegment(BaseTestIO, unittest.TestCase):
@@ -219,39 +217,39 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         # r = NestIO(filenames='gdf_nest_test_files/withgidF-time_in_stepsF
         # -1254-0.gdf')
         r = NestIO(filenames='gdf_nest_test_files/0time-1255-0.gdf')
-        r.read_spiketrain(t_start=400. * pq.ms, t_stop=500. * pq.ms, lazy=False,
+        r.read_spiketrain(t_start=400.*pq.ms, t_stop=500.*pq.ms, lazy=False,
                           id_column=None, time_column=0)
-        r.read_segment(t_start=400. * pq.ms, t_stop=500. * pq.ms, lazy=False,
-                       id_column=None, time_column=0)
+        r.read_segment(t_start=400.*pq.ms, t_stop=500.*pq.ms, lazy=False,
+                       id_column_gdf=None, time_column_gdf=0)
 
         # r = NestIO(filenames='gdf_nest_test_files/withgidF-time_in_stepsT
         # -1256-0.gdf')
         r = NestIO(filenames='gdf_nest_test_files/0time_in_steps-1257-0.gdf')
-        r.read_spiketrain(t_start=400. * pq.ms, t_stop=500. * pq.ms,
+        r.read_spiketrain(t_start=400.*pq.ms, t_stop=500.*pq.ms,
                           time_unit=pq.CompoundUnit('0.1*ms'), lazy=False,
                           id_column=None, time_column=0)
-        r.read_segment(t_start=400. * pq.ms, t_stop=500. * pq.ms,
+        r.read_segment(t_start=400.*pq.ms, t_stop=500.*pq.ms,
                        time_unit=pq.CompoundUnit('0.1*ms'), lazy=False,
-                       id_column=None, time_column=0)
+                       id_column_gdf=None, time_column_gdf=0)
 
         # r = NestIO(filenames='gdf_nest_test_files/withgidT-time_in_stepsF
         # -1255-0.gdf')
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
-        r.read_spiketrain(gdf_id=1, t_start=400. * pq.ms, t_stop=500. * pq.ms,
-                          lazy=False, id_column=0, time_column=1)
-        r.read_segment(gid_list=[1], t_start=400. * pq.ms, t_stop=500. * pq.ms,
-                       lazy=False, id_column=0, time_column=1)
+        r.read_spiketrain(gdf_id=1, t_start=400.*pq.ms, t_stop=500.*pq.ms,
+                          lazy=False, id_column_gdf=0, time_column_gdf=1)
+        r.read_segment(gid_list=[1], t_start=400.*pq.ms, t_stop=500.*pq.ms,
+                       lazy=False, id_column_gdf=0, time_column_gdf=1)
 
         # r = NestIO(filenames='gdf_nest_test_files/withgidT-time_in_stepsT
         # -1257-0.gdf')
         r = NestIO(
             filenames='gdf_nest_test_files/0gid-1time_in_steps-1258-0.gdf')
-        r.read_spiketrain(gdf_id=1, t_start=400. * pq.ms, t_stop=500. * pq.ms,
+        r.read_spiketrain(gdf_id=1, t_start=400.*pq.ms, t_stop=500.*pq.ms,
                           time_unit=pq.CompoundUnit('0.1*ms'), lazy=False,
                           id_column=0, time_column=1)
-        r.read_segment(gid_list=[1], t_start=400. * pq.ms, t_stop=500. * pq.ms,
+        r.read_segment(gid_list=[1], t_start=400.*pq.ms, t_stop=500.*pq.ms,
                        time_unit=pq.CompoundUnit('0.1*ms'), lazy=False,
-                       id_column=0, time_column=1)
+                       id_column_gdf=0, time_column_gdf=1)
 
     def test_read_integer(self):
         """
@@ -259,29 +257,29 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         are stored in time steps in the file.
         """
         r = NestIO(filenames='gdf_nest_test_files/0time_in_steps-1257-0.gdf')
-        st = r.read_spiketrain(gdf_id=None, t_start=400. * pq.ms,
-                               t_stop=500. * pq.ms,
+        st = r.read_spiketrain(gdf_id=None, t_start=400.*pq.ms,
+                               t_stop=500.*pq.ms,
                                time_unit=pq.CompoundUnit('0.1*ms'),
                                lazy=False, id_column=None, time_column=0)
         self.assertTrue(st.magnitude.dtype == np.int32)
-        seg = r.read_segment(gid_list=[None], t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms,
+        seg = r.read_segment(gid_list=[None], t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms,
                              time_unit=pq.CompoundUnit('0.1*ms'),
-                             lazy=False, id_column=None, time_column=0)
+                             lazy=False, id_column_gdf=None, time_column_gdf=0)
         sts = seg.spiketrains
         self.assertTrue(all([st.magnitude.dtype == np.int32 for st in sts]))
 
         r = NestIO(
             filenames='gdf_nest_test_files/0gid-1time_in_steps-1258-0.gdf')
-        st = r.read_spiketrain(gdf_id=1, t_start=400. * pq.ms,
-                               t_stop=500. * pq.ms,
+        st = r.read_spiketrain(gdf_id=1, t_start=400.*pq.ms,
+                               t_stop=500.*pq.ms,
                                time_unit=pq.CompoundUnit('0.1*ms'),
                                lazy=False, id_column=0, time_column=1)
         self.assertTrue(st.magnitude.dtype == np.int32)
-        seg = r.read_segment(gid_list=[1], t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms,
+        seg = r.read_segment(gid_list=[1], t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms,
                              time_unit=pq.CompoundUnit('0.1*ms'),
-                             lazy=False, id_column=0, time_column=1)
+                             lazy=False, id_column_gdf=0, time_column_gdf=1)
         sts = seg.spiketrains
         self.assertTrue(all([st.magnitude.dtype == np.int32 for st in sts]))
 
@@ -291,13 +289,13 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         are stored as floats in the file.
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
-        st = r.read_spiketrain(gdf_id=1, t_start=400. * pq.ms,
-                               t_stop=500. * pq.ms,
+        st = r.read_spiketrain(gdf_id=1, t_start=400.*pq.ms,
+                               t_stop=500.*pq.ms,
                                lazy=False, id_column=0, time_column=1)
         self.assertTrue(st.magnitude.dtype == np.float)
-        seg = r.read_segment(gid_list=[1], t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms,
-                             lazy=False, id_column=0, time_column=1)
+        seg = r.read_segment(gid_list=[1], t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms,
+                             lazy=False, id_column_gdf=0, time_column_gdf=1)
         sts = seg.spiketrains
         self.assertTrue(all([s.magnitude.dtype == np.float for s in sts]))
 
@@ -308,9 +306,9 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         id_to_test = 1
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
         seg = r.read_segment(gid_list=[id_to_test],
-                             t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms, lazy=False,
-                             id_column=0, time_column=1)
+                             t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms, lazy=False,
+                             id_column_gdf=0, time_column_gdf=1)
 
         dat = np.loadtxt('gdf_nest_test_files/0gid-1time-1256-0.gdf')
         target_data = dat[:, 1][np.where(dat[:, 0] == id_to_test)]
@@ -325,15 +323,15 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
 
         id_list_to_test = range(1, 10)
-        seg = r.read_segment(gid_list=id_list_to_test, t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms, lazy=False,
-                             id_column=0, time_column=1)
+        seg = r.read_segment(gid_list=id_list_to_test, t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms, lazy=False,
+                             id_column_gdf=0, time_column_gdf=1)
         self.assertTrue(len(seg.spiketrains) == len(id_list_to_test))
 
         id_list_to_test = []
-        seg = r.read_segment(gid_list=id_list_to_test, t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms, lazy=False,
-                             id_column=0, time_column=1)
+        seg = r.read_segment(gid_list=id_list_to_test, t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms, lazy=False,
+                             id_column_gdf=0, time_column_gdf=1)
         self.assertTrue(len(seg.spiketrains) == 50)
 
     def test_read_segment_accepts_range(self):
@@ -342,9 +340,9 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
 
-        seg = r.read_segment(gid_list=(10, 39), t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms, lazy=False,
-                             id_column=0, time_column=1)
+        seg = r.read_segment(gid_list=(10, 39), t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms, lazy=False,
+                             id_column_gdf=0, time_column_gdf=1)
         self.assertEqual(len(seg.spiketrains), 30)
 
     def test_read_segment_range_is_reasonable(self):
@@ -354,14 +352,14 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
 
-        seg = r.read_segment(gid_list=(10, 10), t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms, lazy=False,
-                             id_column=0, time_column=1)
+        seg = r.read_segment(gid_list=(10, 10), t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms, lazy=False,
+                             id_column_gdf=0, time_column_gdf=1)
         self.assertEqual(len(seg.spiketrains), 1)
         with self.assertRaises(ValueError):
-            r.read_segment(gid_list=(10, 9), t_start=400. * pq.ms,
-                            t_stop=500. * pq.ms, lazy=False,
-                            id_column=0, time_column=1)
+            r.read_segment(gid_list=(10, 9), t_start=400.*pq.ms,
+                            t_stop=500.*pq.ms, lazy=False,
+                            id_column_gdf=0, time_column_gdf=1)
 
     def test_read_spiketrain_annotates(self):
         """
@@ -369,8 +367,8 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
         ID = 7
-        st = r.read_spiketrain(gdf_id=ID, t_start=400. * pq.ms,
-                               t_stop=500. * pq.ms)
+        st = r.read_spiketrain(gdf_id=ID, t_start=400.*pq.ms,
+                               t_stop=500.*pq.ms)
         self.assertEqual(ID, st.annotations['id'])
 
     def test_read_segment_annotates(self):
@@ -379,8 +377,8 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
         IDs = (5, 11)
-        sts = r.read_segment(gid_list=(5, 11), t_start=400. * pq.ms,
-                             t_stop=500. * pq.ms)
+        sts = r.read_segment(gid_list=(5, 11), t_start=400.*pq.ms,
+                             t_stop=500.*pq.ms)
         for ID in np.arange(5, 12):
             self.assertEqual(ID, sts.spiketrains[ID - 5].annotations['id'])
 
@@ -389,8 +387,8 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         Tests if custom annotation is correctly added.
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
-        st = r.read_spiketrain(gdf_id=0, t_start=400. * pq.ms,
-                               t_stop=500. * pq.ms,
+        st = r.read_spiketrain(gdf_id=0, t_start=400.*pq.ms,
+                               t_stop=500.*pq.ms,
                                layer='L23', population='I')
         self.assertEqual(0, st.annotations.pop('id'))
         self.assertEqual('L23', st.annotations.pop('layer'))
@@ -405,9 +403,9 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
         with self.assertRaises(ValueError):
-            r.read_segment(t_start=400. * pq.ms, t_stop=500. * pq.ms,
+            r.read_segment(t_start=400.*pq.ms, t_stop=500.*pq.ms,
                            lazy=False,
-                           id_column=0, time_column=1)
+                           id_column_gdf=0, time_column_gdf=1)
         with self.assertRaises(ValueError):
             r.read_segment()
 
@@ -417,12 +415,12 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
 
-        t_stop_targ = 490. * pq.ms
-        t_start_targ = 410. * pq.ms
+        t_stop_targ = 490.*pq.ms
+        t_start_targ = 410.*pq.ms
 
         seg = r.read_segment(gid_list=[], t_start=t_start_targ,
                              t_stop=t_stop_targ, lazy=False,
-                             id_column=0, time_column=1)
+                             id_column_gdf=0, time_column_gdf=1)
         sts = seg.spiketrains
         self.assertTrue(np.max([np.max(st.magnitude) for st in sts
                                 if len(st) > 0])
@@ -437,11 +435,11 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
         with self.assertRaises(ValueError):
-            r.read_spiketrain(gdf_id=1, t_stop=500. * pq.ms, lazy=False,
+            r.read_spiketrain(gdf_id=1, t_stop=500.*pq.ms, lazy=False,
                               id_column=0, time_column=1)
         with self.assertRaises(ValueError):
-            r.read_segment(gid_list=[1, 2, 3], t_stop=500. * pq.ms, lazy=False,
-                           id_column=0, time_column=1)
+            r.read_segment(gid_list=[1, 2, 3], t_stop=500.*pq.ms, lazy=False,
+                           id_column_gdf=0, time_column_gdf=1)
 
     def test_t_stop_undefined_raises_error(self):
         """
@@ -449,11 +447,11 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
         with self.assertRaises(ValueError):
-            r.read_spiketrain(gdf_id=1, t_start=400. * pq.ms, lazy=False,
+            r.read_spiketrain(gdf_id=1, t_start=400.*pq.ms, lazy=False,
                               id_column=0, time_column=1)
         with self.assertRaises(ValueError):
-            r.read_segment(gid_list=[1, 2, 3], t_start=400. * pq.ms, lazy=False,
-                           id_column=0, time_column=1)
+            r.read_segment(gid_list=[1, 2, 3], t_start=400.*pq.ms, lazy=False,
+                           id_column_gdf=0, time_column_gdf=1)
 
     def test_gdf_id_illdefined_raises_error(self):
         """
@@ -462,13 +460,13 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
         with self.assertRaises(ValueError):
-            r.read_spiketrain(gdf_id=[], t_start=400. * pq.ms,
-                              t_stop=500. * pq.ms)
+            r.read_spiketrain(gdf_id=[], t_start=400.*pq.ms,
+                              t_stop=500.*pq.ms)
         with self.assertRaises(ValueError):
-            r.read_spiketrain(gdf_id=[1], t_start=400. * pq.ms,
-                              t_stop=500. * pq.ms)
+            r.read_spiketrain(gdf_id=[1], t_start=400.*pq.ms,
+                              t_stop=500.*pq.ms)
         with self.assertRaises(ValueError):
-            r.read_spiketrain(t_start=400. * pq.ms, t_stop=500. * pq.ms)
+            r.read_spiketrain(t_start=400.*pq.ms, t_stop=500.*pq.ms)
 
     def test_read_segment_can_return_empty_spiketrains(self):
         """
@@ -476,8 +474,8 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         returned.
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
-        seg = r.read_segment(gid_list=[], t_start=400. * pq.ms,
-                             t_stop=1. * pq.ms)
+        seg = r.read_segment(gid_list=[], t_start=400.*pq.ms,
+                             t_stop=1.*pq.ms)
         for st in seg.spiketrains:
             self.assertEqual(st.size, 0)
 
@@ -487,9 +485,25 @@ class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
         time range.
         """
         r = NestIO(filenames='gdf_nest_test_files/0gid-1time-1256-0.gdf')
-        st = r.read_spiketrain(gdf_id=0, t_start=400. * pq.ms,
-                               t_stop=1. * pq.ms)
+        st = r.read_spiketrain(gdf_id=0, t_start=400.*pq.ms,
+                               t_stop=1.*pq.ms)
         self.assertEqual(st.size, 0)
+
+class TestNestIO_multiple_signals(BaseTestIO, unittest.TestCase):
+    ioclass = NestIO
+    files_to_test = []
+    files_to_download = []
+
+    def test_read_analogsignal_and_spiketrain(self):
+        files = ['gdf_nest_test_files/0gid-1time-2gex-3Vm-1261-0.dat',
+                 'gdf_nest_test_files/0gid-1time_in_steps-1258-0.gdf']
+        r = NestIO(filenames=files)
+        seg = r.read_segment(gid_list=[], t_start=400*pq.ms, t_stop=600*pq.ms,
+                             id_column_gdf=0, time_column_gdf=1,
+                             id_column_dat=0, time_column_dat=1,
+                             value_columns_dat=2)
+        self.assertEqual(len(seg.spiketrains),50)
+        self.assertEqual(len(seg.analogsignalarrays),50)
 
 
 class TestColumnIO(unittest.TestCase):
@@ -550,6 +564,3 @@ class TestColumnIO(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-    # suite = unittest.TestSuite()
-    # suite.addTest(TestNestIO('test_read_analogsignalarray'))
-    # unittest.TextTestRunner(verbosity=2).run(suite)

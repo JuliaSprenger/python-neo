@@ -414,8 +414,9 @@ class NestIO(BaseIO):
         return selected_ids
 
     def read_segment(self, gid_list=None, time_unit=pq.ms, t_start=None,
-                     t_stop=None, sampling_period=None, id_column=0,
-                     time_column=1, value_columns=2, value_types=None,
+                     t_stop=None, sampling_period=None, id_column_dat=0,
+                     time_column_dat=1, value_columns_dat=2,
+                     id_column_gdf=0, time_column_gdf=1, value_types=None,
                      value_units=None, lazy=False, cascade=True):
         """
         Read a Segment which contains SpikeTrain(s) with specified neuron IDs
@@ -437,12 +438,16 @@ class NestIO(BaseIO):
             raises an error.
         sampling_period : Quantity (frequency), optional, default: None
             Sampling period of the recorded data.
-        id_column : int, optional, default: 0
-            Column index of neuron IDs.
-        time_column : int, optional, default: 1
-            Column index of time stamps.
-        value_columns : int, optional, default: 2
-            Column index of the analog values recorded.
+        id_column_dat : int, optional, default: 0
+            Column index of neuron IDs in the dat file.
+        time_column_dat : int, optional, default: 1
+            Column index of time stamps in the dat file.
+        value_columns_dat : int, optional, default: 2
+            Column index of the analog values recorded in the dat file.
+        id_column_gdf : int, optional, default: 0
+            Column index of neuron IDs in the gdf file.
+        time_column_gdf : int, optional, default: 1
+            Column index of time stamps in the gdf file.
         value_types : str, optional, default: None
             Nest data type of the analog values recorded, eg.'V_m', 'I', 'g_e'
         value_units : Quantity (amplitude), default: None
@@ -491,9 +496,9 @@ class NestIO(BaseIO):
                         t_start,
                         t_stop,
                         sampling_period=sampling_period,
-                        id_column=id_column,
-                        time_column=time_column,
-                        value_columns=value_columns,
+                        id_column=id_column_dat,
+                        time_column=time_column_dat,
+                        value_columns=value_columns_dat,
                         value_types=value_types,
                         value_units=value_units,
                         lazy=lazy)
@@ -502,9 +507,8 @@ class NestIO(BaseIO):
                                                           time_unit,
                                                           t_start,
                                                           t_stop,
-                                                          id_column=id_column,
-                                                          time_column=time_column)
-
+                                                          id_column=id_column_gdf,
+                                                          time_column=time_column_gdf)
 
         return seg
 
@@ -611,7 +615,13 @@ class NestIO(BaseIO):
 
 
 class ColumnIO:
+    '''
+    Class for reading ascii file containing multiple columns of data.
+    '''
     def __init__(self, filename):
+        """
+        filename: string, ascii file to read.
+        """
 
         self.filename = filename
 
@@ -631,12 +641,20 @@ class ColumnIO:
     def get_columns(self, column_ids='all', condition=None,
                     condition_column=None, sorting_columns=None):
         """
-        :param column_ids:
-        :param condition:
-        :param condition_column:
-        :param sorting_columns: Column ids to sort by. In increasing sorting
-        priority!
-        :return:
+        column_ids : 'all' or list of integer values, the ids of columns to
+                    extract
+        condition : None or function, which is applied to each row to evaluate
+                    if it should be included in the result.
+                    Needs to return a bool value.
+        condition_column : integer, id of the column on which the condition
+                    function is applied to
+        sorting_columns : integer or list of integers, column ids to sort by.
+                    List entries have to be ordered by increasing sorting
+                    priority!
+
+        Returns
+        -------
+        numpy array containing the requested data
         """
 
         if column_ids == [] or column_ids == 'all':
