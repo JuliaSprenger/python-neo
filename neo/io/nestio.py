@@ -159,8 +159,8 @@ class NestIO(BaseIO):
                 for v_id, value_column in enumerate(value_columns):
                     signal = data[selected_ids[0]:selected_ids[1], value_column]
 
-                    # create AnalogSinalArray objects and annotate them with the
-                    # neuron ID
+                    # create AnalogSignalArray objects and annotate them with
+                    #  the neuron ID
                     analogsignal_list.append(AnalogSignalArray(
                             signal * value_units[v_id],
                             sampling_period=sampling_period,
@@ -176,7 +176,8 @@ class NestIO(BaseIO):
                            t_start, t_stop, id_column,
                            time_column, **args):
         """
-        Internal function called by read_spiketrain() and read_segment().
+        Internal function for reading multiple spiketrains at once.
+        This function is called by read_spiketrain() and read_segment().
         """
 
         if 'gdf' not in self.avail_IOs:
@@ -205,74 +206,33 @@ class NestIO(BaseIO):
                 column_ids[i] = -1
 
         (condition, condition_column, sorting_column) = \
-            self._get_conditions_and_sorting(id_column,time_column,
-                                             gdf_id_list,t_start,t_stop)
+            self._get_conditions_and_sorting(id_column, time_column,
+                                             gdf_id_list, t_start, t_stop)
 
-        # # load GDF data
-        # filename = self.avail_formats['gdf'] + '.gdf'
-        # f = open(filename)
-        # # read the first line to check the data type (int or float) of the spike
-        # # times, assuming that only the column of time stamps may contain
-        # # floats. then load the whole file accordingly.
-        # line = f.readline()
-        # if '.' not in line:
-        #     data = np.loadtxt(filename, dtype=np.int32)
-        # else:
-        #     data = np.loadtxt(filename, dtype=np.float)
-        # f.close()
         data = self.avail_IOs['gdf'].get_columns(
-            column_ids=column_ids,
-            condition=condition,
-            condition_column=condition_column,
-            sorting_columns=sorting_column)
-
-        # # check loaded data and given arguments
-        # if len(data.shape) < 2 and id_column is not None:
-        #     raise ValueError('File does not contain neuron IDs but '
-        #                      'id_column specified to ' + str(id_column) + '.')
-
-        # # get consistent dimensions of data
-        # if len(data.shape) < 2:
-        #     data = data.reshape((-1, 1))
-
-        # # use only data from the time interval between t_start and t_stop
-        # data = data[np.where(np.logical_and(
-        #             data[:, time_column] >= t_start.rescale(
-        #                 time_unit).magnitude,
-        #             data[:, time_column] < t_stop.rescale(time_unit).magnitude))]
+                column_ids=column_ids,
+                condition=condition,
+                condition_column=condition_column,
+                sorting_columns=sorting_column)
 
         # create a list of SpikeTrains for all neuron IDs in gdf_id_list
         # assign spike times to neuron IDs if id_column is given
         # TODO: Go on here with correcting handling of data object!
         if id_column is not None:
-            # if gdf_id_list == []:
-            #     gdf_id_list = np.unique(data[:, id_column]).astype(int)
-            #     full_gdf_id_list = gdf_id_list
-            # else:
-            #     full_gdf_id_list = \
-            #         np.unique(np.append(data[:, id_column].astype(int),
-            #                             np.asarray(gdf_id_list)))
-            # extracting complete gid list for anasig generation
-
             if (gdf_id_list == []) and id_column is not None:
                 gdf_id_list = np.unique(data[:, id_column])
-
-            # stdict = {i:[] for i in full_gdf_id_list}
-
-            # for i,nid in enumerate(data[:, id_column]):
-            #     stdict[nid].append(data[i, time_column])
 
             spiketrain_list = []
             for nid in gdf_id_list:
                 selected_ids = self._get_selected_ids(nid, id_column,
                                                       time_column, t_start,
                                                       t_stop, time_unit, data)
-                times = data[selected_ids[0]:selected_ids[1],time_column]
+                times = data[selected_ids[0]:selected_ids[1], time_column]
                 spiketrain_list.append(SpikeTrain(
 
-                    times, units=time_unit,
-                    t_start=t_start, t_stop=t_stop,
-                    id=nid, **args))
+                        times, units=time_unit,
+                        t_start=t_start, t_stop=t_stop,
+                        id=nid, **args))
 
         # if id_column is not given, all spike times are collected in one
         # spike train with id=None
@@ -281,12 +241,19 @@ class NestIO(BaseIO):
             spiketrain_list = [SpikeTrain(train, units=time_unit,
                                           t_start=t_start, t_stop=t_stop,
                                           id=None, **args)]
-
         return spiketrain_list
 
-
     def _check_input_times(self, t_start, t_stop, mandatory=True):
-        # checking input times
+        """
+        Checking input times for existence and setting default values if
+        necessary.
+
+        t_start: pq.quantity.Quantity, start time of the time range to load
+        t_stop: pq.quantity.Quantity, stop tim of the time range to load
+        mandatory: bool, if True times can not be None and and error will be
+                raised. if False, time values of None will be replaced by
+                -infinity or infinity, respectively.
+        """
         if t_stop is None:
             if mandatory:
                 raise ValueError('No t_start specified.')
@@ -305,6 +272,16 @@ class NestIO(BaseIO):
 
     def _check_input_values_parameters(self, value_columns, value_types,
                                        value_units):
+        """
+        Check value parameters for consistency
+
+        value_columns: int, column id containing the value to be loaded
+        value_types: list of strings, type of values to be loaded
+        value_units: list of units of the value columns loaded
+
+        Returns
+        adjusted list of [value_columns, value_types, value_units]
+        """
         if value_columns is None:
             raise ValueError('No value column provided.')
         if isinstance(value_columns, int):
@@ -335,6 +312,15 @@ class NestIO(BaseIO):
         return value_columns, value_types, value_units
 
     def _check_input_gids(self, gid_list, id_column):
+        """
+        Check gid values and column for consistency
+
+        gid_list: list of integer or None, gid to be loaded
+        id_column: int, id of the column containing the gids
+
+        Return
+        adjusted list of [gid_list, id_column]
+        """
         if gid_list is None:
             gid_list = [gid_list]
 
@@ -351,10 +337,21 @@ class NestIO(BaseIO):
 
     def _check_input_sampling_period(self, sampling_period, time_column,
                                      time_unit, data):
+        """
+        Check sampling period, times and time unit for consistency
+
+        sampling_period: pq.quantity.Quantity, sampling period of data to load
+        time_column: int, column id of times in data to load
+        time_unit: pq.quantity.Quantity, unit of time used in the data to load
+        data: numpy array, the data to be loaded / interpreted
+
+        Return
+        pq.quantities.Quantity object, the updated sampling period
+        """
         if sampling_period is None:
             if time_column is not None:
                 data_sampling = np.unique(
-                    np.diff(sorted(np.unique(data[:, 1]))))
+                        np.diff(sorted(np.unique(data[:, 1]))))
                 if len(data_sampling) > 1:
                     raise ValueError('Different sampling distances found in '
                                      'data set (%s)' % data_sampling)
@@ -371,6 +368,19 @@ class NestIO(BaseIO):
 
     def _get_conditions_and_sorting(self, id_column, time_column, gid_list,
                                     t_start, t_stop):
+        """
+        Calculate the condition, condition_column and sorting_column based on
+        other parameters supplied for loading the data
+
+        id_column: int, id of the column containing gids
+        time_column: int, id of the column containing times
+        gid_list: list of int, gid to be loaded
+        t_start: pq.quantity.Quantity, start of the time range to be loaded
+        t_stop: pq.quantity.Quantity, stop of the time range to be loaded
+
+        Return
+        updated [condition, condition_column, sorting_column]
+        """
         condition, condition_column = None, None
         sorting_column = []
         curr_id = 0
@@ -394,6 +404,20 @@ class NestIO(BaseIO):
 
     def _get_selected_ids(self, gid, id_column, time_column, t_start, t_stop,
                           time_unit, data):
+        """
+        Calculate the data range to load depending on the selected gid
+        and the provided time range (t_start, t_stop)
+
+        gid: int, gid to be loaded
+        id_column: int, id of the column containing gids
+        time_column: int, id of the column containing times
+        t_start: pq.quantity.Quantity, start of the time range to load
+        t_stop: pq.quantity.Quantity, stop of the time range to load
+        time_unit: pq.quantity.Quantity, time unit of the data to load
+        data: numpy array, data to load
+
+        Return
+        """
         gid_ids = np.array([0, data.shape[0]])
         if id_column is not None:
             gid_ids = np.array([np.searchsorted(data[:, 0], gid, side='left'),
@@ -430,7 +454,7 @@ class NestIO(BaseIO):
             then raises an error. Specify an empty list [] to retrieve the spike
             trains of all neurons.
         time_unit : Quantity (time), optional, default: quantities.ms
-            The time unit of recorded time stamps.
+            The time unit of recorded time stamps in dat as well as gdf files.
         t_start : Quantity (time), optional, default: 0 * pq.ms
             Start time of SpikeTrain.
         t_stop : Quantity (time), default: None
@@ -475,19 +499,6 @@ class NestIO(BaseIO):
         seg = Segment()
 
         if cascade:
-            ###################################
-            # WARNING: This only works if column structure of gdf and dat
-            # file is
-            # identical
-            ###################################
-            # seg = super(NestIO, self).read_segment(lazy=lazy, cascade=cascade,
-            #                                        gdf_id_list=gid_list,
-            #                                        time_unit=time_unit,
-            #                                        t_start=t_start,
-            #                                        t_stop=t_stop,
-            #                                        id_column=id_column,
-            #                                        time_column=time_column)
-
             # Load analogsignalarrays and attach to Segment
             if 'dat' in self.avail_formats:
                 seg.analogsignalarrays = self.__read_analogsinalarrays(
@@ -606,21 +617,20 @@ class NestIO(BaseIO):
             raise ValueError('No neuron ID specified but file contains '
                              'neuron IDs in column ' + str(id_column) + '.')
 
-        # __read_spiketrains() needs a list of IDs
         return self.__read_spiketrains([gdf_id], time_unit,
                                        t_start, t_stop,
                                        id_column, time_column,
                                        **args)[0]
 
 
-
 class ColumnIO:
     '''
-    Class for reading ascii file containing multiple columns of data.
+    Class for reading an ascii file containing multiple columns of data.
     '''
+
     def __init__(self, filename):
         """
-        filename: string, ascii file to read.
+        filename: string, path to ascii file to read.
         """
 
         self.filename = filename
@@ -635,8 +645,8 @@ class ColumnIO:
 
         self.data = np.loadtxt(self.filename, **additional_parameters)
 
-        if len(self.data.shape)==1:
-            self.data = self.data[:,np.newaxis]
+        if len(self.data.shape) == 1:
+            self.data = self.data[:, np.newaxis]
 
     def get_columns(self, column_ids='all', condition=None,
                     condition_column=None, sorting_columns=None):
@@ -708,16 +718,3 @@ class ColumnIO:
         # selected_data = np.squeeze(selected_data[:, column_ids])
 
         return selected_data
-
-        # Alternative implementation idea: Index all data rows during
-        # initialization and reimplement get_columns based on this
-
-        # def create_index_for_column(self,column_id):
-        #     if column_id > self.data.shape[1]:
-        #         raise ValueError('Column index out of range of data sets')
-        #
-        #     if column_id not in self.indexed_columns:
-        #         contained_values = np.unique(self.data[:,column_id])
-        #
-        #     else:
-        #         return self.indexed_columns[column_id]
