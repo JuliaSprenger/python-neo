@@ -19,7 +19,6 @@ import numpy as np
 import quantities as pq
 
 from neo.io.baseio import BaseIO
-from neo.io import GdfIO
 from neo.core import Segment, SpikeTrain, AnalogSignalArray
 
 value_type_dict = {'V': pq.mV,
