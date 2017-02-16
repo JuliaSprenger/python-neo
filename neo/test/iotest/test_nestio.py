@@ -201,7 +201,7 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
         """
         Test for simultaneous loading of multiple columns from dat file.
         """
-        files = 'gdf_nest_test_files/0gid-1time-2Vm-3Iex-4Iin-1263-0.dat'
+        files = 'gdf_nest_test_files/0gid-1time-2Vm-3Iex-4Iin-1264-0.dat'
         r = NestIO(filenames=files)
 
         sampling_period = pq.CompoundUnit('5*ms')
