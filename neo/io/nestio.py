@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Class for reading output files of NEST.
+Class for reading output files from NEST simulations
+( http://www.nest-simulator.org/ ).
+Tested with NEST2.10.0
 
 Depends on: numpy, quantities
 
@@ -10,7 +12,7 @@ Authors: Julia Sprenger, Maximilian Schmidt, Johanna Senk
 
 """
 
-# needed for python 3 compatibility
+# needed for Python3 compatibility
 from __future__ import absolute_import
 
 import os.path
@@ -29,13 +31,23 @@ value_type_dict = {'V': pq.mV,
 
 class NestIO(BaseIO):
     """
-    Class for reading GDF files, e.g., the spike output of NEST.
-    TODO 
+    Class for reading NEST output files. GDF files for the spike data and DAT
+    files for analog signals are possible.
+
     Usage:
-        TODO
+        from neo.io.nestio import NestIO
+
+        files = ['membrane_voltages-1261-0.dat',
+                 'spikes-1258-0.gdf']
+        r = NestIO(filenames=files)
+        seg = r.read_segment(gid_list=[], t_start=400 * pq.ms,
+                             t_stop=600 * pq.ms,
+                             id_column_gdf=0, time_column_gdf=1,
+                             id_column_dat=0, time_column_dat=1,
+                             value_columns_dat=2)
     """
 
-    is_readable = True  # This class can only read data
+    is_readable = True  # class supports reading, but not writing
     is_writable = False
 
     supported_objects = [SpikeTrain, AnalogSignalArray]
@@ -44,8 +56,7 @@ class NestIO(BaseIO):
     has_header = False
     is_streameable = False
 
-    # do not supported write so no GUI stuff
-    write_params = None
+    write_params = None # writing is not supported
 
     name = 'nest'
     extensions = ['gdf', 'dat']
@@ -73,11 +84,11 @@ class NestIO(BaseIO):
                 if ext in self.avail_IOs:
                     raise ValueError('Received multiple files with "%s" '
                                      'extention. Can only load single file of '
-                                     'this type' % ext)
+                                     'this type.' % ext)
                 self.avail_IOs[ext] = ColumnIO(filename)
             self.avail_formats[ext] = path
 
-    def __read_analogsinalarrays(self, gid_list, time_unit, t_start=None,
+    def __read_analogsignalarrays(self, gid_list, time_unit, t_start=None,
                                  t_stop=None, sampling_period=None,
                                  id_column=0, time_column=1,
                                  value_columns=2, value_types=None,
@@ -87,7 +98,7 @@ class NestIO(BaseIO):
         """
 
         if 'dat' not in self.avail_formats:
-            raise ValueError('Can not load analogsignalarrays. No dat file '
+            raise ValueError('Can not load analogsignalarrays. No DAT file '
                              'provided.')
 
         # checking gid input parameters
@@ -111,7 +122,7 @@ class NestIO(BaseIO):
         # assert that no single column is assigned twice
         column_list = [id_column, time_column] + value_columns
         if len(np.unique(column_list)) < 3:
-            raise ValueError('1 or more columns have been specified to contain '
+            raise ValueError('One or more columns have been specified to contain '
                              'the same data. Columns were specified to %s.'
                              '' % column_list)
 
@@ -151,10 +162,10 @@ class NestIO(BaseIO):
                     anasig_start_time = data[selected_ids[0], 1] * time_unit
                 else:
                     # set t_start equal to sampling_period because NEST starts
-                    # recording only after 1 sampling_period
+                    #  recording only after 1 sampling_period
                     anasig_start_time = 1. * sampling_period
 
-                # create one analogsignalarray per value colum requested
+                # create one analogsignalarray per value column requested
                 for v_id, value_column in enumerate(value_columns):
                     signal = data[selected_ids[0]:selected_ids[1], value_column]
 
@@ -180,7 +191,7 @@ class NestIO(BaseIO):
         """
 
         if 'gdf' not in self.avail_IOs:
-            raise ValueError('Can not load spiketrains. No gdf file provided.')
+            raise ValueError('Can not load spiketrains. No GDF file provided.')
 
         # assert that the file contains spike times
         if time_column is None:
@@ -194,7 +205,7 @@ class NestIO(BaseIO):
 
         # assert that no single column is assigned twice
         if id_column == time_column:
-            raise ValueError('1 or more columns have been specified to '
+            raise ValueError('One or more columns have been specified to '
                              'contain the same data.')
 
         # defining standard column order for internal usage
@@ -216,7 +227,6 @@ class NestIO(BaseIO):
 
         # create a list of SpikeTrains for all neuron IDs in gdf_id_list
         # assign spike times to neuron IDs if id_column is given
-        # TODO: Go on here with correcting handling of data object!
         if id_column is not None:
             if (gdf_id_list == []) and id_column is not None:
                 gdf_id_list = np.unique(data[:, id_column])
@@ -234,7 +244,7 @@ class NestIO(BaseIO):
                         id=nid, **args))
 
         # if id_column is not given, all spike times are collected in one
-        # spike train with id=None
+        #  spike train with id=None
         else:
             train = data[:, time_column]
             spiketrain_list = [SpikeTrain(train, units=time_unit,
@@ -244,14 +254,14 @@ class NestIO(BaseIO):
 
     def _check_input_times(self, t_start, t_stop, mandatory=True):
         """
-        Checking input times for existence and setting default values if
+        Checks input times for existence and setting default values if
         necessary.
 
-        t_start: pq.quantity.Quantity, start time of the time range to load
-        t_stop: pq.quantity.Quantity, stop tim of the time range to load
-        mandatory: bool, if True times can not be None and and error will be
+        t_start: pq.quantity.Quantity, start time of the time range to load.
+        t_stop: pq.quantity.Quantity, stop time of the time range to load.
+        mandatory: bool, if True times can not be None and an error will be
                 raised. if False, time values of None will be replaced by
-                -infinity or infinity, respectively.
+                -infinity or infinity, respectively. default: True.
         """
         if t_stop is None:
             if mandatory:
@@ -272,11 +282,11 @@ class NestIO(BaseIO):
     def _check_input_values_parameters(self, value_columns, value_types,
                                        value_units):
         """
-        Check value parameters for consistency
+        Checks value parameters for consistency.
 
-        value_columns: int, column id containing the value to be loaded
-        value_types: list of strings, type of values to be loaded
-        value_units: list of units of the value columns loaded
+        value_columns: int, column id containing the value to load.
+        value_types: list of strings, type of values.
+        value_units: list of units of the value columns.
 
         Returns
         adjusted list of [value_columns, value_types, value_units]
@@ -312,13 +322,13 @@ class NestIO(BaseIO):
 
     def _check_input_gids(self, gid_list, id_column):
         """
-        Check gid values and column for consistency
+        Checks gid values and column for consistency.
 
-        gid_list: list of integer or None, gid to be loaded
-        id_column: int, id of the column containing the gids
+        gid_list: list of int or None, gid to load.
+        id_column: int, id of the column containing the gids.
 
-        Return
-        adjusted list of [gid_list, id_column]
+        Returns
+        adjusted list of [gid_list, id_column].
         """
         if gid_list is None:
             gid_list = [gid_list]
@@ -337,15 +347,15 @@ class NestIO(BaseIO):
     def _check_input_sampling_period(self, sampling_period, time_column,
                                      time_unit, data):
         """
-        Check sampling period, times and time unit for consistency
+        Checks sampling period, times and time unit for consistency.
 
-        sampling_period: pq.quantity.Quantity, sampling period of data to load
-        time_column: int, column id of times in data to load
-        time_unit: pq.quantity.Quantity, unit of time used in the data to load
-        data: numpy array, the data to be loaded / interpreted
+        sampling_period: pq.quantity.Quantity, sampling period of data to load.
+        time_column: int, column id of times in data to load.
+        time_unit: pq.quantity.Quantity, unit of time used in the data to load.
+        data: numpy array, the data to be loaded / interpreted.
 
-        Return
-        pq.quantities.Quantity object, the updated sampling period
+        Returns
+        pq.quantities.Quantity object, the updated sampling period.
         """
         if sampling_period is None:
             if time_column is not None:
@@ -368,17 +378,17 @@ class NestIO(BaseIO):
     def _get_conditions_and_sorting(self, id_column, time_column, gid_list,
                                     t_start, t_stop):
         """
-        Calculate the condition, condition_column and sorting_column based on
-        other parameters supplied for loading the data
+        Calculates the condition, condition_column and sorting_column based on
+        other parameters supplied for loading the data.
 
-        id_column: int, id of the column containing gids
-        time_column: int, id of the column containing times
-        gid_list: list of int, gid to be loaded
-        t_start: pq.quantity.Quantity, start of the time range to be loaded
-        t_stop: pq.quantity.Quantity, stop of the time range to be loaded
+        id_column: int, id of the column containing gids.
+        time_column: int, id of the column containing times.
+        gid_list: list of int, gid to be loaded.
+        t_start: pq.quantity.Quantity, start of the time range to be loaded.
+        t_stop: pq.quantity.Quantity, stop of the time range to be loaded.
 
-        Return
-        updated [condition, condition_column, sorting_column]
+        Returns
+        updated [condition, condition_column, sorting_column].
         """
         condition, condition_column = None, None
         sorting_column = []
@@ -404,18 +414,19 @@ class NestIO(BaseIO):
     def _get_selected_ids(self, gid, id_column, time_column, t_start, t_stop,
                           time_unit, data):
         """
-        Calculate the data range to load depending on the selected gid
+        Calculates the data range to load depending on the selected gid
         and the provided time range (t_start, t_stop)
 
-        gid: int, gid to be loaded
-        id_column: int, id of the column containing gids
-        time_column: int, id of the column containing times
-        t_start: pq.quantity.Quantity, start of the time range to load
-        t_stop: pq.quantity.Quantity, stop of the time range to load
-        time_unit: pq.quantity.Quantity, time unit of the data to load
-        data: numpy array, data to load
+        gid: int, gid to be loaded.
+        id_column: int, id of the column containing gids.
+        time_column: int, id of the column containing times.
+        t_start: pq.quantity.Quantity, start of the time range to load.
+        t_stop: pq.quantity.Quantity, stop of the time range to load.
+        time_unit: pq.quantity.Quantity, time unit of the data to load.
+        data: numpy array, data to load.
 
-        Return
+        Returns
+        list of selected gids
         """
         gid_ids = np.array([0, data.shape[0]])
         if id_column is not None:
@@ -442,10 +453,10 @@ class NestIO(BaseIO):
                      id_column_gdf=0, time_column_gdf=1, value_types=None,
                      value_units=None, lazy=False, cascade=True):
         """
-        Read a Segment which contains SpikeTrain(s) with specified neuron IDs
+        Reads a Segment which contains SpikeTrain(s) with specified neuron IDs
         from the GDF data.
 
-        Parameters
+        Arguments
         ----------
         gid_list : list, default: None
             A list of GDF IDs of which to return SpikeTrain(s). gid_list must
@@ -453,7 +464,7 @@ class NestIO(BaseIO):
             then raises an error. Specify an empty list [] to retrieve the spike
             trains of all neurons.
         time_unit : Quantity (time), optional, default: quantities.ms
-            The time unit of recorded time stamps in dat as well as gdf files.
+            The time unit of recorded time stamps in DAT as well as GDF files.
         t_start : Quantity (time), optional, default: 0 * pq.ms
             Start time of SpikeTrain.
         t_stop : Quantity (time), default: None
@@ -462,19 +473,19 @@ class NestIO(BaseIO):
         sampling_period : Quantity (frequency), optional, default: None
             Sampling period of the recorded data.
         id_column_dat : int, optional, default: 0
-            Column index of neuron IDs in the dat file.
+            Column index of neuron IDs in the DAT file.
         time_column_dat : int, optional, default: 1
-            Column index of time stamps in the dat file.
+            Column index of time stamps in the DAT file.
         value_columns_dat : int, optional, default: 2
-            Column index of the analog values recorded in the dat file.
+            Column index of the analog values recorded in the DAT file.
         id_column_gdf : int, optional, default: 0
-            Column index of neuron IDs in the gdf file.
+            Column index of neuron IDs in the GDF file.
         time_column_gdf : int, optional, default: 1
-            Column index of time stamps in the gdf file.
+            Column index of time stamps in the GDF file.
         value_types : str, optional, default: None
             Nest data type of the analog values recorded, eg.'V_m', 'I', 'g_e'
         value_units : Quantity (amplitude), default: None
-            The physical unit of the recorded signal values
+            The physical unit of the recorded signal values.
         lazy : bool, optional, default: False
         cascade : bool, optional, default: True
 
@@ -486,8 +497,8 @@ class NestIO(BaseIO):
         """
         if isinstance(gid_list, tuple):
             if gid_list[0] > gid_list[1]:
-                raise ValueError('second entry in range should be '
-                                 'greater or equal to first entry.')
+                raise ValueError('The second entry in gid_list must be '
+                                 'greater or equal to the first entry.')
             gid_list = range(gid_list[0], gid_list[1] + 1)
 
         # __read_xxx() needs a list of IDs
@@ -500,7 +511,7 @@ class NestIO(BaseIO):
         if cascade:
             # Load analogsignalarrays and attach to Segment
             if 'dat' in self.avail_formats:
-                seg.analogsignalarrays = self.__read_analogsinalarrays(
+                seg.analogsignalarrays = self.__read_analogsignalarrays(
                         gid_list,
                         time_unit,
                         t_start,
@@ -522,17 +533,15 @@ class NestIO(BaseIO):
 
         return seg
 
-    def read_analogsignalarray(self, lazy=False,
-                               gid=None, time_unit=pq.ms, t_start=None,
+    def read_analogsignalarray(self, gid=None, time_unit=pq.ms, t_start=None,
                                t_stop=None, sampling_period=None, id_column=0,
                                time_column=1, value_column=2, value_type=None,
-                               value_unit=None):
+                               value_unit=None, lazy=False):
         """
-        Read AnalogSignalArray with specified neuron ID from the DAT data.
+        Reads an AnalogSignalArray with specified neuron ID from the DAT data.
 
-        Parameters
+        Arguments
         ----------
-        lazy : bool, optional, default: False
         gid : int, default: None
             The GDF ID of the returned SpikeTrain. gdf_id must be specified if
             the GDF file contains neuron IDs, the default None then raises an
@@ -554,9 +563,10 @@ class NestIO(BaseIO):
         value_column : int, optional, default: 2
             Column index of the analog values recorded.
         value_type : str, optional, default: None
-            Nest data type of the analog values recorded, eg.'V_m', 'I', 'g_e'
+            Nest data type of the analog values recorded, eg.'V_m', 'I', 'g_e'.
         value_unit : Quantity (amplitude), default: None
-            The physical unit of the recorded signal values
+            The physical unit of the recorded signal values.
+        lazy : bool, optional, default: False
 
         Returns
         -------
@@ -566,31 +576,28 @@ class NestIO(BaseIO):
         """
 
         # __read_spiketrains() needs a list of IDs
-        return self.__read_analogsinalarrays([gid], time_unit,
-                                             t_start, t_stop,
-                                             sampling_period=sampling_period,
-                                             id_column=id_column,
-                                             time_column=time_column,
-                                             value_columns=value_column,
-                                             value_types=value_type,
-                                             value_units=value_unit,
-                                             lazy=lazy)[0]
+        return self.__read_analogsignalarrays([gid], time_unit,
+                                              t_start, t_stop,
+                                              sampling_period=sampling_period,
+                                              id_column=id_column,
+                                              time_column=time_column,
+                                              value_columns=value_column,
+                                              value_types=value_type,
+                                              value_units=value_unit,
+                                              lazy=lazy)[0]
 
     def read_spiketrain(
-            self, lazy=False, cascade=True, gdf_id=None,
-            time_unit=pq.ms, t_start=None, t_stop=None,
-            id_column=0, time_column=1, **args):
+            self, gdf_id=None, time_unit=pq.ms, t_start=None, t_stop=None,
+            id_column=0, time_column=1, lazy=False, cascade=True, **args):
         """
-        Read a SpikeTrain with specified neuron ID from the GDF data.
+        Reads a SpikeTrain with specified neuron ID from the GDF data.
 
-        Parameters
+        Arguments
         ----------
-        lazy : bool, optional, default: False
-        cascade : bool, optional, default: True
         gdf_id : int, default: None
             The GDF ID of the returned SpikeTrain. gdf_id must be specified if
-            the GDF file contains neuron IDs. Providing [] loads all gdf_ids
-            available.
+            the GDF file contains neuron IDs. Providing [] loads all available
+            IDs.
         time_unit : Quantity (time), optional, default: quantities.ms
             The time unit of recorded time stamps.
         t_start : Quantity (time), default: None
@@ -601,6 +608,8 @@ class NestIO(BaseIO):
             Column index of neuron IDs.
         time_column : int, optional, default: 1
             Column index of time stamps.
+        lazy : bool, optional, default: False
+        cascade : bool, optional, default: True
 
         Returns
         -------
@@ -624,12 +633,12 @@ class NestIO(BaseIO):
 
 class ColumnIO:
     '''
-    Class for reading an ascii file containing multiple columns of data.
+    Class for reading an ASCII file containing multiple columns of data.
     '''
 
     def __init__(self, filename):
         """
-        filename: string, path to ascii file to read.
+        filename: string, path to ASCII file to read.
         """
 
         self.filename = filename
@@ -650,20 +659,20 @@ class ColumnIO:
     def get_columns(self, column_ids='all', condition=None,
                     condition_column=None, sorting_columns=None):
         """
-        column_ids : 'all' or list of integer values, the ids of columns to
-                    extract
+        column_ids : 'all' or list of int, the ids of columns to
+                    extract.
         condition : None or function, which is applied to each row to evaluate
                     if it should be included in the result.
                     Needs to return a bool value.
-        condition_column : integer, id of the column on which the condition
+        condition_column : int, id of the column on which the condition
                     function is applied to
-        sorting_columns : integer or list of integers, column ids to sort by.
+        sorting_columns : int or list of int, column ids to sort by.
                     List entries have to be ordered by increasing sorting
                     priority!
 
         Returns
         -------
-        numpy array containing the requested data
+        numpy array containing the requested data.
         """
 
         if column_ids == [] or column_ids == 'all':
@@ -714,6 +723,5 @@ class ColumnIO:
 
         # Select only requested columns
         selected_data = selected_data[:, column_ids]
-        # selected_data = np.squeeze(selected_data[:, column_ids])
 
         return selected_data
