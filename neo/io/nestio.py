@@ -121,12 +121,12 @@ class NestIO(BaseIO):
 
         # assert that no single column is assigned twice
         column_list = [id_column, time_column] + value_columns
-        if len(np.unique(column_list)) < 3:
+        column_list_no_None = [c for c in column_list if c is not None]
+        if len(np.unique(column_list_no_None)) < len(column_list_no_None):
             raise ValueError(
                 'One or more columns have been specified to contain '
                 'the same data. Columns were specified to %s.'
-                '' %
-                column_list)
+                '' %column_list_no_None)
 
         # extracting condition and sorting parameters for raw data loading
         (condition, condition_column,
@@ -177,8 +177,8 @@ class NestIO(BaseIO):
                         signal * value_units[v_id],
                         sampling_period=sampling_period,
                         t_start=anasig_start_time,
-                        annotations={'id': i,
-                                     'type': value_types[v_id]}))
+                        id=i,
+                        type=value_types[v_id]))
                     # check for correct length of analogsignal
                     assert (analogsignal_list[-1].t_stop ==
                             anasig_start_time + len(signal) * sampling_period)

@@ -58,6 +58,18 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
                        time_column_dat=1, value_columns_dat=2,
                        value_types='V_m')
 
+        r = NestIO(filenames='gdf_nest_test_files/0gid-1time-2Vm-1259-0.dat')
+        r.read_analogsignalarray(gid=1, t_stop=1000. * pq.ms,
+                                 time_unit=pq.CompoundUnit('0.1*ms'),
+                                 sampling_period=pq.ms, lazy=False,
+                                 id_column=0, time_column=1,
+                                 value_column=2, value_type='V_m')
+        r.read_segment(gid_list=[1], t_stop=1000. * pq.ms,
+                       time_unit=pq.CompoundUnit('0.1*ms'),
+                       sampling_period=pq.ms, lazy=False, id_column_dat=0,
+                       time_column_dat=1, value_columns_dat=2,
+                       value_types='V_m')
+
     def test_id_column_none_multiple_neurons(self):
         """
         Tests if function correctly raises an error if the user tries to read
@@ -210,6 +222,32 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
                              sampling_period=sampling_period)
         anasigs = seg.analogsignalarrays
         self.assertEqual(len(anasigs), 2)
+
+    def test_single_gid(self):
+        r = NestIO(filenames='gdf_nest_test_files/N1-0gid-1time-2Vm-1265-0.dat')
+        anasig = r.read_analogsignalarray(gid=1, t_stop=1000. * pq.ms,
+                                 time_unit=pq.CompoundUnit('0.1*ms'),
+                                 sampling_period=pq.ms, lazy=False,
+                                 id_column=0, time_column=1,
+                                 value_column=2, value_type='V_m')
+        assert anasig.annotations['id'] == 1
+
+    def test_no_gid(self):
+        r = NestIO(filenames='gdf_nest_test_files/N1-0time-1Vm-1266-0.dat')
+        anasig = r.read_analogsignalarray(gid=None, t_stop=1000. * pq.ms,
+                                 time_unit=pq.CompoundUnit('0.1*ms'),
+                                 sampling_period=pq.ms, lazy=False,
+                                 id_column=None, time_column=0,
+                                 value_column=1, value_type='V_m')
+        assert anasig.annotations['id'] == None
+
+    def test_no_gid_no_time(self):
+        r = NestIO(filenames='gdf_nest_test_files/N1-0time-1Vm-1266-0.dat')
+        anasig = r.read_analogsignalarray(gid=None,
+                                 sampling_period=pq.ms, lazy=False,
+                                 id_column=None, time_column=None,
+                                 value_column=0, value_type='V_m')
+        assert anasig.annotations['id'] == None
 
 
 class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
