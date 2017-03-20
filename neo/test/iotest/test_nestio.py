@@ -240,15 +240,17 @@ class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
                                  sampling_period=pq.ms, lazy=False,
                                  id_column=None, time_column=0,
                                  value_column=1, value_type='V_m')
-        assert anasig.annotations['id'] == None
+        self.assertEqual(anasig.annotations['id'], None)
+        self.assertEqual(len(anasig), 19)
 
     def test_no_gid_no_time(self):
-        r = NestIO(filenames='gdf_nest_test_files/N1-0time-1Vm-1266-0.dat')
+        r = NestIO(filenames='gdf_nest_test_files/N1-0Vm-1267-0.dat')
         anasig = r.read_analogsignal(gid=None,
                                  sampling_period=pq.ms, lazy=False,
                                  id_column=None, time_column=None,
                                  value_column=0, value_type='V_m')
-        assert anasig.annotations['id'] == None
+        self.assertEqual(anasig.annotations['id'], None)
+        self.assertEqual(len(anasig), 19)
 
 
 class TestNestIO_Spiketrains(BaseTestIO, unittest.TestCase):
