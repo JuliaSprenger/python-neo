@@ -21,7 +21,7 @@ import numpy as np
 import quantities as pq
 
 from neo.io.baseio import BaseIO
-from neo.core import Segment, SpikeTrain, AnalogSignalArray
+from neo.core import Segment, SpikeTrain, AnalogSignal
 
 value_type_dict = {'V': pq.mV,
                    'I': pq.pA,
@@ -50,8 +50,8 @@ class NestIO(BaseIO):
     is_readable = True  # class supports reading, but not writing
     is_writable = False
 
-    supported_objects = [SpikeTrain, AnalogSignalArray]
-    readable_objects = [SpikeTrain, AnalogSignalArray]
+    supported_objects = [SpikeTrain, AnalogSignal]
+    readable_objects = [SpikeTrain, AnalogSignal]
 
     has_header = False
     is_streameable = False
@@ -88,17 +88,17 @@ class NestIO(BaseIO):
                 self.avail_IOs[ext] = ColumnIO(filename)
             self.avail_formats[ext] = path
 
-    def __read_analogsignalarrays(self, gid_list, time_unit, t_start=None,
+    def __read_analogsignals(self, gid_list, time_unit, t_start=None,
                                   t_stop=None, sampling_period=None,
                                   id_column=0, time_column=1,
                                   value_columns=2, value_types=None,
                                   value_units=None, lazy=False):
         """
-        Internal function called by read_analogsignalarray() and read_segment().
+        Internal function called by read_analogsignal() and read_segment().
         """
 
         if 'dat' not in self.avail_formats:
-            raise ValueError('Can not load analogsignalarrays. No DAT file '
+            raise ValueError('Can not load analogsignals. No DAT file '
                              'provided.')
 
         # checking gid input parameters
@@ -153,12 +153,12 @@ class NestIO(BaseIO):
             if (gid_list == []) and id_column is not None:
                 gid_list = np.unique(data[:, id_column])
 
-            # generate analogsignalarrays for each neuron ID
+            # generate analogsignals for each neuron ID
             for i in gid_list:
                 selected_ids = self._get_selected_ids(
                     i, id_column, time_column, t_start, t_stop, time_unit, data)
 
-                # extract starting time of analogsignalarray
+                # extract starting time of analogsignal
                 if (time_column is not None) and data.size:
                     anasig_start_time = data[selected_ids[0], 1] * time_unit
                 else:
@@ -166,14 +166,14 @@ class NestIO(BaseIO):
                     #  recording only after 1 sampling_period
                     anasig_start_time = 1. * sampling_period
 
-                # create one analogsignalarray per value column requested
+                # create one analogsignal per value column requested
                 for v_id, value_column in enumerate(value_columns):
                     signal = data[
                         selected_ids[0]:selected_ids[1], value_column]
 
-                    # create AnalogSignalArray objects and annotate them with
+                    # create AnalogSignal objects and annotate them with
                     #  the neuron ID
-                    analogsignal_list.append(AnalogSignalArray(
+                    analogsignal_list.append(AnalogSignal(
                         signal * value_units[v_id],
                         sampling_period=sampling_period,
                         t_start=anasig_start_time,
@@ -496,7 +496,7 @@ class NestIO(BaseIO):
         Returns
         -------
         seg : Segment
-            The Segment contains one SpikeTrain and one AnalogSignalArray for
+            The Segment contains one SpikeTrain and one AnalogSignal for
             each ID in gid_list.
         """
         if isinstance(gid_list, tuple):
@@ -513,9 +513,9 @@ class NestIO(BaseIO):
         seg = Segment()
 
         if cascade:
-            # Load analogsignalarrays and attach to Segment
+            # Load analogsignals and attach to Segment
             if 'dat' in self.avail_formats:
-                seg.analogsignalarrays = self.__read_analogsignalarrays(
+                seg.analogsignals = self.__read_analogsignals(
                     gid_list,
                     time_unit,
                     t_start,
@@ -538,12 +538,12 @@ class NestIO(BaseIO):
 
         return seg
 
-    def read_analogsignalarray(self, gid=None, time_unit=pq.ms, t_start=None,
+    def read_analogsignal(self, gid=None, time_unit=pq.ms, t_start=None,
                                t_stop=None, sampling_period=None, id_column=0,
                                time_column=1, value_column=2, value_type=None,
                                value_unit=None, lazy=False):
         """
-        Reads an AnalogSignalArray with specified neuron ID from the DAT data.
+        Reads an AnalogSignal with specified neuron ID from the DAT data.
 
         Arguments
         ----------
@@ -581,7 +581,7 @@ class NestIO(BaseIO):
         """
 
         # __read_spiketrains() needs a list of IDs
-        return self.__read_analogsignalarrays([gid], time_unit,
+        return self.__read_analogsignals([gid], time_unit,
                                               t_start, t_stop,
                                               sampling_period=sampling_period,
                                               id_column=id_column,
