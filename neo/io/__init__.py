@@ -32,9 +32,11 @@ Classes:
 
 .. autoclass:: neo.io.ElphyIO
 
-.. autoclass:: neo.io.GdfIO
+.. autoclass:: neo.io.IgorIO
 
 .. autoclass:: neo.io.KlustaKwikIO
+
+.. autoclass:: neo.io.KwikIO
 
 .. autoclass:: neo.io.MicromedIO
 
@@ -49,6 +51,8 @@ Classes:
 .. autoclass:: neo.io.NeuroScopeIO
 
 .. autoclass:: neo.io.NeuroshareIO
+
+.. autoclass:: neo.io.NixIO
 
 .. autoclass:: neo.io.PickleIO
 
@@ -72,7 +76,7 @@ Classes:
 
 import os.path
 
-#try to import the neuroshare library. 
+#try to import the neuroshare library.
 #if it is present, use the neuroshareapiio to load neuroshare files
 #if it is not present, use the neurosharectypesio to load files
 try:
@@ -100,16 +104,18 @@ from neo.io.brainwaredamio import BrainwareDamIO
 from neo.io.brainwaref32io import BrainwareF32IO
 from neo.io.brainwaresrcio import BrainwareSrcIO
 from neo.io.elanio import ElanIO
-from neo.io.elphyio import ElphyIO
+#from neo.io.elphyio import ElphyIO
 from neo.io.exampleio import ExampleIO
+from neo.io.igorproio import IgorIO
 from neo.io.klustakwikio import KlustaKwikIO
+from neo.io.kwikio import KwikIO
 from neo.io.micromedio import MicromedIO
 from neo.io.hdf5io import NeoHdf5IO
 from neo.io.neomatlabio import NeoMatlabIO
 from neo.io.nestio import NestIO
 from neo.io.neuroexplorerio import NeuroExplorerIO
 from neo.io.neuroscopeio import NeuroScopeIO
-
+from neo.io.nixio import NixIO
 from neo.io.pickleio import PickleIO
 from neo.io.plexonio import PlexonIO
 from neo.io.pynnio import PyNNNumpyIO
@@ -122,7 +128,8 @@ from neo.io.winedrio import WinEdrIO
 from neo.io.winwcpio import WinWcpIO
 
 
-iolist = [AlphaOmegaIO,
+iolist = [
+          AlphaOmegaIO,
           AsciiSignalIO,
           AsciiSpikeTrainIO,
           AxonIO,
@@ -132,10 +139,13 @@ iolist = [AlphaOmegaIO,
           BrainwareF32IO,
           BrainwareSrcIO,
           ElanIO,
-          ElphyIO,
+          #ElphyIO,
           ExampleIO,
+          IgorIO,
           KlustaKwikIO,
+          KwikIO,
           MicromedIO,
+          NixIO,  # place NixIO before NeoHdf5IO to make it the default for .h5 files
           NeoHdf5IO,
           NeoMatlabIO,
           NestIO,
@@ -151,7 +161,8 @@ iolist = [AlphaOmegaIO,
           StimfitIO,
           TdtIO,
           WinEdrIO,
-          WinWcpIO]
+          WinWcpIO
+]
 
 
 def get_io(filename):

@@ -26,7 +26,9 @@ else:
 from neo.core.spiketrain import (check_has_dimensions_time, SpikeTrain,
                                  _check_time_in_range, _new_spiketrain)
 from neo.core import Segment, Unit
-from neo.test.tools import assert_arrays_equal, assert_neo_object_is_compliant
+from neo.test.tools import  (assert_arrays_equal,
+                             assert_arrays_almost_equal,
+                             assert_neo_object_is_compliant)
 from neo.test.generate_datasets import (get_fake_value, get_fake_values,
                                         fake_neo, TEST_ANNOTATIONS)
 
@@ -39,10 +41,11 @@ class Test__generate_datasets(unittest.TestCase):
 
     def test__get_fake_values(self):
         self.annotations['seed'] = 0
-        times = get_fake_value('times', pq.Quantity, seed=0, dim=1)
+        waveforms = get_fake_value('waveforms', pq.Quantity, seed=3, dim=3)
+        shape = waveforms.shape[0]
+        times = get_fake_value('times', pq.Quantity, seed=0, dim=1, shape=waveforms.shape[0])
         t_start = get_fake_value('t_start', pq.Quantity, seed=1, dim=0)
         t_stop = get_fake_value('t_stop', pq.Quantity, seed=2, dim=0)
-        waveforms = get_fake_value('waveforms', pq.Quantity, seed=3, dim=3)
         left_sweep = get_fake_value('left_sweep', pq.Quantity, seed=4, dim=0)
         sampling_rate = get_fake_value('sampling_rate', pq.Quantity,
                                        seed=5, dim=0)
@@ -400,7 +403,7 @@ class TestConstructor(unittest.TestCase):
         train2 = _new_spiketrain(SpikeTrain, times,
                                  t_start=t_start, t_stop=t_stop, units="s")
 
-        dtype = np.float32
+        dtype = times.dtype
         units = 1 * pq.s
         t_start_out = t_start
         t_stop_out = t_stop
@@ -742,6 +745,11 @@ class TestConstructor(unittest.TestCase):
         self.assertRaises(ValueError, _new_spiketrain, SpikeTrain,
                           np.arange(t_start, t_stop+5), units='ms',
                           t_start=t_start, t_stop=t_stop)
+
+    def test__create_with_len_times_different_size_than_waveform_shape1_ValueError(self):
+        self.assertRaises(ValueError, SpikeTrain,
+                          times=np.arange(10), units='s',
+                          t_stop=4, waveforms=np.ones((10,6,50)))
 
     def test_defaults(self):
         # default recommended attributes
@@ -1135,6 +1143,41 @@ class TestTimeSlice(unittest.TestCase):
         self.assertEqual(self.train1.t_start, result.t_start)
         self.assertEqual(self.train1.t_stop, result.t_stop)
 
+class TestDuplicateWithNewData(unittest.TestCase):
+    def setUp(self):
+        self.waveforms = np.array([[[0., 1.],
+                                    [0.1, 1.1]],
+                                   [[2., 3.],
+                                    [2.1, 3.1]],
+                                   [[4., 5.],
+                                    [4.1, 5.1]],
+                                   [[6., 7.],
+                                    [6.1, 7.1]],
+                                   [[8., 9.],
+                                    [8.1, 9.1]],
+                                   [[10., 11.],
+                                    [10.1, 11.1]]]) * pq.mV
+        self.data = np.array([0.1, 0.5, 1.2, 3.3, 6.4, 7])
+        self.dataquant = self.data*pq.ms
+        self.train = SpikeTrain(self.dataquant, t_stop=10.0*pq.ms,
+                                waveforms=self.waveforms)
+
+    def test_duplicate_with_new_data(self):
+        signal1 = self.train
+        new_t_start = -10*pq.s
+        new_t_stop = 10*pq.s
+        new_data = np.sort(np.random.uniform(new_t_start.magnitude,
+                                             new_t_stop.magnitude,
+                                             len(self.train))) * pq.ms
+
+        signal1b = signal1.duplicate_with_new_data(new_data,
+                                                   t_start=new_t_start,
+                                                   t_stop=new_t_stop)
+        assert_arrays_almost_equal(np.asarray(signal1b),
+                                   np.asarray(new_data), 1e-12)
+        self.assertEqual(signal1b.t_start, new_t_start)
+        self.assertEqual(signal1b.t_stop, new_t_stop)
+        self.assertEqual(signal1b.sampling_rate, signal1.sampling_rate)
 
 class TestAttributesAnnotations(unittest.TestCase):
     def test_set_universally_recommended_attributes(self):
@@ -1322,6 +1365,20 @@ class TestChanging(unittest.TestCase):
             self.assertRaises(ValueError, train.__setslice__,
                               0, 3, [0, 4, 5] * pq.ms)
 
+    def test__adding_time(self):
+        data = [3, 4, 5] * pq.ms
+        train = SpikeTrain(data, copy=False, t_start=0.5, t_stop=10.0)
+        assert_neo_object_is_compliant(train)
+        self.assertRaises(ValueError, train.__add__, 10 * pq.ms)
+        assert_arrays_equal(train + 1 * pq.ms, data + 1 * pq.ms)
+
+    def test__subtracting_time(self):
+        data = [3, 4, 5] * pq.ms
+        train = SpikeTrain(data, copy=False, t_start=0.5, t_stop=10.0)
+        assert_neo_object_is_compliant(train)
+        self.assertRaises(ValueError, train.__sub__, 10 * pq.ms)
+        assert_arrays_equal(train - 1 * pq.ms, data - 1 * pq.ms)
+
     def test__rescale(self):
         data = [3, 4, 5] * pq.ms
         train = SpikeTrain(data, t_start=0.5, t_stop=10.0)
@@ -1472,7 +1529,7 @@ class TestPropertiesMethods(unittest.TestCase):
         segment.create_many_to_one_relationship()
 
         unit = Unit(name='unit1')
-        unit.spikes = [self.train1]
+        unit.spiketrains = [self.train1]
         unit.create_many_to_one_relationship()
 
         self.assertEqual(self.train1._single_parent_objects,

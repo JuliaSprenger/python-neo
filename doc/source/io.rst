@@ -13,8 +13,6 @@ The more these heterogeneous formats are supported, the easier it will be to man
 Therefore the IO set of classes propose a simple and flexible IO API that fits many format specifications.
 It is not only file-oriented, it can also read/write objects from a database.
 
-:mod:`neo.io` can be seen as a *pure-Python* and open-source Neuroshare replacement.
-
 At the moment, there are 3 families of IO modules:
     1. for reading closed manufacturers' formats (Spike2, Plexon, AlphaOmega, BlackRock, Axon, ...)
     2. for reading(/writing) formats from open source tools (KlustaKwik, Elan, WinEdr, WinWcp, PyNN, ...)
@@ -54,15 +52,15 @@ One format = one class
 The basic syntax is as follows. If you want to load a file format that is implemented in a generic :class:`MyFormatIO` class::
 
     >>> from neo.io import MyFormatIO
-    >>> reader = MyFormatIO(filename = "myfile.dat")
+    >>> reader = MyFormatIO(filename="myfile.dat")
 
 you can replace :class:`MyFormatIO` by any implemented class, see :ref:`list_of_io`
 
 Modes
 ======
 
-IO can be based on file, directory, database or fake
-This is describe in mode attribute of the IO class.
+IO can be based on a single file, a directory containing files, or a database.
+This is described in the :attr:`mode` attribute of the IO class.
 
     >>> from neo.io import MyFormatIO
     >>> print MyFormatIO.mode
@@ -158,17 +156,50 @@ Some IOs support advanced forms of lazy loading, cascading or both (these featur
   You do not have to do anything else, lazy cascading is now active for the object you just loaded. You can interact with the object in the same way
   as if it was loaded with ``cascade=True``. However, only the objects that are actually accessed are loaded as soon as they are needed::
 
-    >>> print(block.recordingchannelgroups[0].name)  # The first RecordingChannelGroup is loaded
+    >>> print(block.channelindexes[0].name)  # The first ChannelIndex is loaded
     >>> print(block.segments[0].analogsignals[1])  # The first Segment and its second AnalogSignal are loaded
 
   Once an object has been loaded with lazy cascading, it stays in memory::
 
     >>> print(block.segments[0].analogsignals[0])  # The first Segment is already in memory, its first AnalogSignal is loaded
 
+
+.. _neo_io_API:
+
+Details of API
+==============
+
+The :mod:`neo.io` API is designed to be simple and intuitive:
+    - each file format has an IO class (for example for Spike2 files you have a :class:`Spike2IO` class).
+    - each IO class inherits from the :class:`BaseIO` class.
+    - each IO class can read or write directly one or several Neo objects (for example :class:`Segment`, :class:`Block`, ...): see the :attr:`readable_objects` and :attr:`writable_objects` attributes of the IO class.
+    - each IO class supports part of the :mod:`neo.core` hierachy, though not necessarily all of it (see :attr:`supported_objects`).
+    - each IO class has a :meth:`read()` method that returns a list of :class:`Block` objects. If the IO only supports :class:`Segment` reading, the list will contain one block with all segments from the file.
+    - each IO class that supports writing has a :meth:`write()` method that takes as a parameter a list of blocks, a single block or a single segment, depending on the IO's :attr:`writable_objects`.
+    - each IO is able to do a *lazy* load: all metadata (e.g. :attr:`sampling_rate`) are read, but not the actual numerical data. lazy_shape attribute is added to provide information on real size.
+    - each IO is able to do a *cascade* load: if ``True`` (default) all child objects are loaded, otherwise only the top level object is loaded.
+    - each IO is able to save and load all required attributes (metadata) of the objects it supports.
+    - each IO can freely add user-defined or manufacturer-defined metadata to the :attr:`annotations` attribute of an object.
+
+
+If you want to develop your own IO
+==================================
+
+See :doc:`io_developers_guide` for information on how to implement a new IO.
+
+
+.. _list_of_io:
+
+List of implemented formats
+===========================
+
+.. automodule:: neo.io
+
+
 Logging
 =======
 
-:mod:`neo` uses the standard python :mod:`logging` module for logging.
+:mod:`neo` uses the standard Python :mod:`logging` module for logging.
 All :mod:`neo.io` classes have logging set up by default, although not all classes produce log messages.
 The logger name is the same as the full qualified class name, e.g. :class:`neo.io.hdf5io.NeoHdf5IO`.
 By default, only log messages that are critically important for users are displayed, so users should not disable log messages unless they are sure they know what they are doing.
@@ -240,40 +271,8 @@ This example changes how the log text is displayed::
 For more complex logging, please see the documentation for the logging_ module.
 
 .. note:: If you wish to implement more advanced logging as describe in the documentation for the logging_ module or elsewhere on the internet, please do so before calling any :mod:`neo` functions or initializing any :mod:`neo` classes.
-This is because the default handler is created when :mod:`neo` is imported, but it is not attached to the :mod:`neo` logger until a class that uses logging is initialized or a function that uses logging is called.
-Further, the handler is only attached if there are no handlers already attached to the root logger or the :mod:`neo` logger, so adding your own logger will override the default one.
-Additional functions and/or classes may get logging during bugfix releases, so code relying on particular modules not having logging may break at any time without warning.
-
-
-.. _neo_io_API:
-
-Details of API
-==============
-
-The :mod:`neo.io` API is designed to be simple and intuitive:
-    - each file format has an IO class (for example for Spike2 files you have a :class:`Spike2IO` class).
-    - each IO class inherits from the :class:`BaseIO` class.
-    - each IO class can read or write directly one or several Neo objects (for example :class:`Segment`, :class:`Block`, ...): see the :attr:`readable_objects` and :attr:`writable_objects` attributes of the IO class.
-    - each IO class supports part of the :mod:`neo.core` hierachy, though not necessarily all of it (see :attr:`supported_objects`).
-    - each IO class has a :meth:`read()` method that returns a list of :class:`Block` objects. If the IO only supports :class:`Segment` reading, the list will contain one block with all segments from the file.
-    - each IO class that supports writing has a :meth:`write()` method that takes as a parameter a list of blocks, a single block or a single segment, depending on the IO's :attr:`writable_objects`.
-    - each IO is able to do a *lazy* load: all metadata (e.g. :attr:`sampling_rate`) are read, but not the actual numerical data. lazy_shape attribute is added to provide information on real size.
-    - each IO is able to do a *cascade* load: if ``True`` (default) all child objects are loaded, otherwise only the top level object is loaded.
-    - each IO is able to save and load all required attributes (metadata) of the objects it supports.
-    - each IO can freely add user-defined or manufacturer-defined metadata to the :attr:`annotations` attribute of an object.
-
-
-.. _list_of_io:
-
-List of implemented formats
-===========================
-
-.. automodule:: neo.io
-
-
-If you want to develop your own IO
-==================================
-
-See :doc:`io_developers_guide` for information on how to implement of a new IO.
+          This is because the default handler is created when :mod:`neo` is imported, but it is not attached to the :mod:`neo` logger until a class that uses logging is initialized or a function that uses logging is called.
+          Further, the handler is only attached if there are no handlers already attached to the root logger or the :mod:`neo` logger, so adding your own logger will override the default one.
+          Additional functions and/or classes may get logging during bugfix releases, so code relying on particular modules not having logging may break at any time without warning.
 
 .. _`logging`: http://docs.python.org/library/logging.html
