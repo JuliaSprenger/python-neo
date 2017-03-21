@@ -18,7 +18,7 @@ import numpy as np
 from neo.io.nestio import ColumnIO
 from neo.io.nestio import NestIO
 from neo.test.iotest.common_io_test import BaseTestIO
-from neo.test.iotest.tools import get_test_file_full_path, create_local_temp_dir
+from neo.test.iotest.tools import get_test_file_full_path
 
 
 class TestNestIO_Analogsignals(BaseTestIO, unittest.TestCase):
