@@ -703,11 +703,11 @@ class TestNestIO_multiple_signal_types(BaseTestIO, unittest.TestCase):
         self.assertEqual(len(seg.analogsignals), 50)
 
 
-class TestColumnIO(unittest.TestCase):
-    local_test_dir = create_local_temp_dir('nest')
+class TestColumnIO(BaseTestIO, unittest.TestCase):
+    ioclass = NestIO
 
     def setUp(self):
-        # BaseTestIO.create_local_dir_if_not_exists(self)
+        BaseTestIO.setUp(self)
         filename = get_test_file_full_path(
                 ioclass=NestIO,
                 filename='0gid-1time-2Vm-3gex-4gin-1260-0.dat',
