@@ -1,0 +1,960 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: graphviz version 2.40.1 (20161225.0304)
+%%Title: 
+%%Pages: 1
+%%BoundingBox: 36 36 1373 1373
+%%EndComments
+save
+%%BeginProlog
+/DotDict 200 dict def
+DotDict begin
+
+/setupLatin1 {
+mark
+/EncodingVector 256 array def
+ EncodingVector 0
+
+ISOLatin1Encoding 0 255 getinterval putinterval
+EncodingVector 45 /hyphen put
+
+% Set up ISO Latin 1 character encoding
+/starnetISO {
+        dup dup findfont dup length dict begin
+        { 1 index /FID ne { def }{ pop pop } ifelse
+        } forall
+        /Encoding EncodingVector def
+        currentdict end definefont
+} def
+/Times-Roman starnetISO def
+/Times-Italic starnetISO def
+/Times-Bold starnetISO def
+/Times-BoldItalic starnetISO def
+/Helvetica starnetISO def
+/Helvetica-Oblique starnetISO def
+/Helvetica-Bold starnetISO def
+/Helvetica-BoldOblique starnetISO def
+/Courier starnetISO def
+/Courier-Oblique starnetISO def
+/Courier-Bold starnetISO def
+/Courier-BoldOblique starnetISO def
+cleartomark
+} bind def
+
+%%BeginResource: procset graphviz 0 0
+/coord-font-family /Times-Roman def
+/default-font-family /Times-Roman def
+/coordfont coord-font-family findfont 8 scalefont def
+
+/InvScaleFactor 1.0 def
+/set_scale {
+       dup 1 exch div /InvScaleFactor exch def
+       scale
+} bind def
+
+% styles
+/solid { [] 0 setdash } bind def
+/dashed { [9 InvScaleFactor mul dup ] 0 setdash } bind def
+/dotted { [1 InvScaleFactor mul 6 InvScaleFactor mul] 0 setdash } bind def
+/invis {/fill {newpath} def /stroke {newpath} def /show {pop newpath} def} bind def
+/bold { 2 setlinewidth } bind def
+/filled { } bind def
+/unfilled { } bind def
+/rounded { } bind def
+/diagonals { } bind def
+/tapered { } bind def
+
+% hooks for setting color 
+/nodecolor { sethsbcolor } bind def
+/edgecolor { sethsbcolor } bind def
+/graphcolor { sethsbcolor } bind def
+/nopcolor {pop pop pop} bind def
+
+/beginpage {	% i j npages
+	/npages exch def
+	/j exch def
+	/i exch def
+	/str 10 string def
+	npages 1 gt {
+		gsave
+			coordfont setfont
+			0 0 moveto
+			(\() show i str cvs show (,) show j str cvs show (\)) show
+		grestore
+	} if
+} bind def
+
+/set_font {
+	findfont exch
+	scalefont setfont
+} def
+
+% draw text fitted to its expected width
+/alignedtext {			% width text
+	/text exch def
+	/width exch def
+	gsave
+		width 0 gt {
+			[] 0 setdash
+			text stringwidth pop width exch sub text length div 0 text ashow
+		} if
+	grestore
+} def
+
+/boxprim {				% xcorner ycorner xsize ysize
+		4 2 roll
+		moveto
+		2 copy
+		exch 0 rlineto
+		0 exch rlineto
+		pop neg 0 rlineto
+		closepath
+} bind def
+
+/ellipse_path {
+	/ry exch def
+	/rx exch def
+	/y exch def
+	/x exch def
+	matrix currentmatrix
+	newpath
+	x y translate
+	rx ry scale
+	0 0 1 0 360 arc
+	setmatrix
+} bind def
+
+/endpage { showpage } bind def
+/showpage { } def
+
+/layercolorseq
+	[	% layer color sequence - darkest to lightest
+		[0 0 0]
+		[.2 .8 .8]
+		[.4 .8 .8]
+		[.6 .8 .8]
+		[.8 .8 .8]
+	]
+def
+
+/layerlen layercolorseq length def
+
+/setlayer {/maxlayer exch def /curlayer exch def
+	layercolorseq curlayer 1 sub layerlen mod get
+	aload pop sethsbcolor
+	/nodecolor {nopcolor} def
+	/edgecolor {nopcolor} def
+	/graphcolor {nopcolor} def
+} bind def
+
+/onlayer { curlayer ne {invis} if } def
+
+/onlayers {
+	/myupper exch def
+	/mylower exch def
+	curlayer mylower lt
+	curlayer myupper gt
+	or
+	{invis} if
+} def
+
+/curlayer 0 def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+14 default-font-family set_font
+% /arrowlength 10 def
+% /arrowwidth 5 def
+
+% make sure pdfmark is harmless for PS-interpreters other than Distiller
+/pdfmark where {pop} {userdict /pdfmark /cleartomark load put} ifelse
+% make '<<' and '>>' safe on PS Level 1 devices
+/languagelevel where {pop languagelevel}{1} ifelse
+2 lt {
+    userdict (<<) cvn ([) cvn load put
+    userdict (>>) cvn ([) cvn load put
+} if
+
+%%EndSetup
+setupLatin1
+%%Page: 1 1
+%%PageBoundingBox: 36 36 1373 1373
+%%PageOrientation: Portrait
+0 0 1 beginpage
+gsave
+36 36 1337 1337 boxprim clip newpath
+1 1 set_scale 0 rotate 40 40 translate
+0 0 0 graphcolor
+14 /Times-Roman set_font
+623.0168 3.8 moveto 83 (NEO 0.7.0.dev) alignedtext
+% NEO
+gsave
+1 setlinewidth
+0 0 0 nodecolor
+613.0642 712.04 88.5 88.5 ellipse_path stroke
+0 0 0 nodecolor
+50 /Arial set_font
+558.5642 699.54 moveto 109 (NEO) alignedtext
+grestore
+% AlphaOmega
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 1101.0238 992.81 moveto
+910.0238 992.81 lineto
+910.0238 951.81 lineto
+1101.0238 951.81 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+918.0238 964.81 moveto 175 (AlphaOmega) alignedtext
+grestore
+% NEO--AlphaOmega
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 682.3119 767.2352 moveto
+727.0987 801.9666 787.26 846.8455 843.1147 882.74 curveto
+883.2056 908.5041 931.2231 934.4153 964.6026 951.6924 curveto
+stroke
+grestore
+% AsciiSignal
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 447.8155 1223.5 moveto
+283.8155 1223.5 lineto
+283.8155 1182.5 lineto
+447.8155 1182.5 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+291.8155 1195.5 moveto 148 (AsciiSignal) alignedtext
+grestore
+% NEO--AsciiSignal
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 580.6559 794.6469 moveto
+549.2831 871.797 498.6525 989.2798 444.6511 1086.2 curveto
+425.1228 1121.2487 398.261 1159.326 381.4762 1182.1675 curveto
+stroke
+grestore
+% AsciiSpikeTrain
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 240.4945 797.54 moveto
+17.4945 797.54 lineto
+17.4945 756.54 lineto
+240.4945 756.54 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+25.4945 769.54 moveto 207 (AsciiSpikeTrain) alignedtext
+grestore
+% NEO--AsciiSpikeTrain
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 525.1222 723.8487 moveto
+445.2573 734.5728 327.0732 750.4424 240.5822 762.0562 curveto
+stroke
+grestore
+% Axon
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 466.5653 412.75 moveto
+381.5653 412.75 lineto
+381.5653 371.75 lineto
+466.5653 371.75 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+389.5653 384.75 moveto 69 (Axon) alignedtext
+grestore
+% NEO--Axon
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 568.0344 635.8486 moveto
+524.7977 562.6913 462.3196 456.9771 436.2286 412.8306 curveto
+stroke
+grestore
+% BCI2000
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 590.7576 1262.4 moveto
+457.7576 1262.4 lineto
+457.7576 1221.4 lineto
+590.7576 1221.4 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+465.7576 1234.4 moveto 117 (BCI2000) alignedtext
+grestore
+% NEO--BCI2000
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 598.3996 799.5356 moveto
+577.2158 925.928 539.319 1152.0369 527.7236 1221.2204 curveto
+stroke
+grestore
+% Blackrock IO
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 797.7249 1328.6 moveto
+611.7249 1328.6 lineto
+611.7249 1287.6 lineto
+797.7249 1287.6 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+619.7249 1300.6 moveto 170 (Blackrock IO) alignedtext
+grestore
+% NEO--Blackrock IO
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 595.6962 798.9873 moveto
+581.8163 883.3879 568.1393 1014.6701 591.0981 1125.8 curveto
+600.0106 1168.9398 607.5213 1179.1411 630.3748 1216.8 curveto
+646.2824 1243.0133 669.0743 1269.8532 685.2216 1287.5859 curveto
+stroke
+grestore
+% BrainVision
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 301.2868 532.02 moveto
+133.2868 532.02 lineto
+133.2868 491.02 lineto
+301.2868 491.02 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+141.2868 504.02 moveto 152 (BrainVision) alignedtext
+grestore
+% NEO--BrainVision
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 545.9437 654.1172 moveto
+511.1401 626.4385 466.841 594.69 423.0955 572.96 curveto
+384.8574 553.9658 339.6532 539.6716 301.3637 529.6729 curveto
+stroke
+grestore
+% Brainware DAM File
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 923.0046 569.39 moveto
+641.0046 569.39 lineto
+641.0046 528.39 lineto
+923.0046 528.39 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+649.0046 541.39 moveto 266 (Brainware DAM File) alignedtext
+grestore
+% NEO--Brainware DAM File
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 676.9333 650.36 moveto
+706.4602 621.8452 739.5636 589.8763 760.5814 569.5789 curveto
+stroke
+grestore
+% Brainware F32 File
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 1193.2438 409.69 moveto
+927.2438 409.69 lineto
+927.2438 368.69 lineto
+1193.2438 368.69 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+935.2438 381.69 moveto 250 (Brainware F32 File) alignedtext
+grestore
+% NEO--Brainware F32 File
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 699.1709 690.9445 moveto
+767.7114 670.4309 862.4028 633.3102 926.2046 572.59 curveto
+941.0559 558.456 935.9625 548.6868 947.032 531.43 curveto
+976.5126 485.4713 1017.85 436.6704 1041.5557 409.8572 curveto
+stroke
+grestore
+% Brainware SRC File
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 912.6199 111.318 moveto
+633.6199 111.318 lineto
+633.6199 70.318 lineto
+912.6199 70.318 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+641.6199 83.318 moveto 263 (Brainware SRC File) alignedtext
+grestore
+% NEO--Brainware SRC File
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 621.394 623.5211 moveto
+625.23 592.2315 630.5768 556.9363 637.8046 525.19 curveto
+653.1544 457.77 675.1386 445.5806 686.1639 377.32 curveto
+695.8791 317.1701 670.8283 299.0454 686.7388 240.23 curveto
+700.3528 189.9038 735.3662 138.9651 756.3998 111.4961 curveto
+stroke
+grestore
+% Elan
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 537.7574 1133.2 moveto
+460.7574 1133.2 lineto
+460.7574 1092.2 lineto
+537.7574 1092.2 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+468.7574 1105.2 moveto 61 (Elan) alignedtext
+grestore
+% NEO--Elan
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 588.7894 797.5002 moveto
+561.8937 892.1873 520.3093 1038.5862 505.0915 1092.1612 curveto
+stroke
+grestore
+% example IO
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 433.7361 288.08 moveto
+264.7361 288.08 lineto
+264.7361 247.08 lineto
+433.7361 247.08 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+272.7361 260.08 moveto 153 (example IO) alignedtext
+grestore
+% NEO--example IO
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 549.2698 650.2501 moveto
+495.2742 594.1863 420.1839 506.641 378.3653 415.95 curveto
+358.6895 373.2797 352.2876 317.742 350.2166 288.193 curveto
+stroke
+grestore
+% igorpro
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 798.9388 284.43 moveto
+689.9388 284.43 lineto
+689.9388 243.43 lineto
+798.9388 243.43 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+697.9388 256.43 moveto 93 (igorpro) alignedtext
+grestore
+% NEO--igorpro
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 620.0721 623.6808 moveto
+623.7933 592.2454 629.4056 556.8161 637.8046 525.19 curveto
+662.5134 432.1493 712.1167 328.0124 733.8396 284.6311 curveto
+stroke
+grestore
+% KlustaKwik
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 1010.3147 879.54 moveto
+846.3147 879.54 lineto
+846.3147 838.54 lineto
+1010.3147 838.54 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+854.3147 851.54 moveto 148 (KlustaKwik) alignedtext
+grestore
+% NEO--KlustaKwik
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 693.4309 749.5147 moveto
+753.9955 777.7557 834.7773 815.4239 884.0914 838.4188 curveto
+stroke
+grestore
+% Kwik
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 855.6676 1011.45 moveto
+775.6676 1011.45 lineto
+775.6676 970.45 lineto
+855.6676 970.45 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+783.6676 983.45 moveto 64 (Kwik) alignedtext
+grestore
+% NEO--Kwik
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 665.2396 783.8663 moveto
+710.2621 845.8455 772.3666 931.3405 800.6049 970.2143 curveto
+stroke
+grestore
+% Micromed
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 929.8295 1177.5 moveto
+782.8295 1177.5 lineto
+782.8295 1136.5 lineto
+929.8295 1136.5 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+790.8295 1149.5 moveto 131 (Micromed) alignedtext
+grestore
+% NEO--Micromed
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 653.3337 790.9646 moveto
+684.9695 852.3534 730.5401 939.4478 772.4676 1014.65 curveto
+796.911 1058.4923 827.1243 1108.9141 843.7967 1136.4326 curveto
+stroke
+grestore
+% NIX
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 661.2981 1122.6 moveto
+594.2981 1122.6 lineto
+594.2981 1081.6 lineto
+661.2981 1081.6 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+602.2981 1094.6 moveto 51 (NIX) alignedtext
+grestore
+% NEO--NIX
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 616.4076 800.5507 moveto
+619.8802 892.483 625.0734 1029.9657 627.0223 1081.5604 curveto
+stroke
+grestore
+% NeoHdf5 IO
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 325.4245 1065.4 moveto
+151.4245 1065.4 lineto
+151.4245 1024.4 lineto
+325.4245 1024.4 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+159.4245 1037.4 moveto 158 (NeoHdf5 IO) alignedtext
+grestore
+% NEO--NeoHdf5 IO
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 560.1545 783.2021 moveto
+516.0719 839.1121 449.319 916.3967 378.9254 971.02 curveto
+350.9471 992.7303 315.6562 1011.2601 287.4432 1024.3322 curveto
+stroke
+grestore
+% neomatlab
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 354.5694 871.2 moveto
+199.5694 871.2 lineto
+199.5694 830.2 lineto
+354.5694 830.2 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+207.5694 843.2 moveto 139 (neomatlab) alignedtext
+grestore
+% NEO--neomatlab
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 530.8707 745.9601 moveto
+467.1472 772.2578 380.9093 807.8469 327.1557 830.0301 curveto
+stroke
+grestore
+% nest
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 543.8656 324.76 moveto
+470.8656 324.76 lineto
+470.8656 283.76 lineto
+543.8656 283.76 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+478.8656 296.76 moveto 57 (nest) alignedtext
+grestore
+% NEO--nest
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 590.7774 626.0586 moveto
+565.7629 529.5537 526.8303 379.354 512.7096 324.877 curveto
+stroke
+grestore
+% Neuralynx
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 419.8955 617.16 moveto
+268.8955 617.16 lineto
+268.8955 576.16 lineto
+419.8955 576.16 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+276.8955 589.16 moveto 135 (Neuralynx) alignedtext
+grestore
+% NEO--Neuralynx
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 531.7256 677.1091 moveto
+486.1642 657.5427 430.9164 633.8165 392.2695 617.2196 curveto
+stroke
+grestore
+% NeuroExplorer
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 1129.9513 726.2 moveto
+920.9513 726.2 lineto
+920.9513 685.2 lineto
+1129.9513 685.2 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+928.9513 698.2 moveto 193 (NeuroExplorer) alignedtext
+grestore
+% NEO--NeuroExplorer
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 701.7849 710.676 moveto
+766.055 709.6879 853.1754 708.3486 920.8402 707.3083 curveto
+stroke
+grestore
+% NeuroScope
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 1010.1375 316.07 moveto
+828.1375 316.07 lineto
+828.1375 275.07 lineto
+1010.1375 275.07 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+836.1375 288.07 moveto 166 (NeuroScope) alignedtext
+grestore
+% NEO--NeuroScope
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 611.4142 623.1314 moveto
+614.1693 590.6181 621.3819 554.6222 637.8046 525.19 curveto
+694.1756 424.1639 814.2817 349.9899 877.7894 316.08 curveto
+stroke
+grestore
+% neuroshare
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 1012.1475 1109.4 moveto
+845.1475 1109.4 lineto
+845.1475 1068.4 lineto
+1012.1475 1068.4 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+853.1475 1081.4 moveto 151 (neuroshare) alignedtext
+grestore
+% NEO--neuroshare
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 678.752 771.5994 moveto
+731.1067 821.006 804.4109 894.6723 858.8676 967.25 curveto
+883.709 1000.3577 906.3294 1043.1393 918.724 1068.1469 curveto
+stroke
+grestore
+% NSDF
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 649.9423 248.11 moveto
+551.9423 248.11 lineto
+551.9423 207.11 lineto
+649.9423 207.11 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+559.9423 220.11 moveto 82 (NSDF) alignedtext
+grestore
+% NEO--NSDF
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 610.8479 623.4699 moveto
+607.9512 507.7073 603.059 312.1993 601.4629 248.4132 curveto
+stroke
+grestore
+% Python pickle file
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 1191.232 575.63 moveto
+950.232 575.63 lineto
+950.232 534.63 lineto
+1191.232 534.63 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+958.232 547.63 moveto 225 (Python pickle file) alignedtext
+grestore
+% NEO--Python pickle file
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 697.0076 683.2603 moveto
+787.8434 652.1175 930.4231 603.2345 1010.6648 575.7239 curveto
+stroke
+grestore
+% Plexon
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 901.9692 445.29 moveto
+793.9692 445.29 lineto
+793.9692 404.29 lineto
+901.9692 404.29 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+801.9692 417.29 moveto 92 (Plexon) alignedtext
+grestore
+% NEO--Plexon
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 607.5915 623.6669 moveto
+609.6688 590.1078 617.4149 553.2499 637.8046 525.19 curveto
+674.8862 474.1588 744.8166 448.0396 793.7916 435.4206 curveto
+stroke
+grestore
+% PyNN NumpyBinaryFile
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 616.895 67.739 moveto
+285.895 67.739 lineto
+285.895 26.739 lineto
+616.895 26.739 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+293.895 39.739 moveto 315 (PyNN NumpyBinaryFile) alignedtext
+grestore
+% NEO--PyNN NumpyBinaryFile
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 605.7252 623.5679 moveto
+596.976 535.4326 579.3081 396.8543 547.0656 280.56 curveto
+524.4908 199.1358 481.5778 107.8703 461.8238 67.8818 curveto
+stroke
+grestore
+% PyNN StandardTextFile
+gsave
+6 setlinewidth
+0.5 1 0.50196 nodecolor
+newpath 1327.2137 809.26 moveto
+1000.2137 809.26 lineto
+1000.2137 768.26 lineto
+1327.2137 768.26 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+1008.2137 781.26 moveto 311 (PyNN StandardTextFile) alignedtext
+grestore
+% NEO--PyNN StandardTextFile
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 700.9252 724.2813 moveto
+785.7165 736.095 915.6824 754.2027 1016.3226 768.2245 curveto
+stroke
+grestore
+% RawBinarySignal
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 246.0386 640.93 moveto
+1.0386 640.93 lineto
+1.0386 599.93 lineto
+246.0386 599.93 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+9.0386 612.93 moveto 229 (RawBinarySignal) alignedtext
+grestore
+% NEO--RawBinarySignal
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 525.8291 695.7148 moveto
+444.0527 680.4111 321.4863 657.474 233.142 640.9412 curveto
+stroke
+grestore
+% Spike2
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 366.1241 459.72 moveto
+258.1241 459.72 lineto
+258.1241 418.72 lineto
+366.1241 418.72 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+266.1241 431.72 moveto 92 (Spike2) alignedtext
+grestore
+% NEO--Spike2
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 547.3935 652.5056 moveto
+480.2904 591.6727 379.78 500.5541 335.0312 459.9866 curveto
+stroke
+grestore
+% Stimfit
+gsave
+6 setlinewidth
+0.625 0.71111 0.88235 nodecolor
+newpath 441.4511 1083 moveto
+341.4511 1083 lineto
+341.4511 1042 lineto
+441.4511 1042 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+349.4511 1055 moveto 84 (Stimfit) alignedtext
+grestore
+% NEO--Stimfit
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 565.5227 787.2225 moveto
+514.1411 868.4775 435.4657 992.8951 404.5607 1041.7684 curveto
+stroke
+grestore
+% Tdt
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 682.9639 374.12 moveto
+623.9639 374.12 lineto
+623.9639 333.12 lineto
+682.9639 333.12 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+631.9639 346.12 moveto 43 (Tdt) alignedtext
+grestore
+% NEO--Tdt
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 622.9989 623.9016 moveto
+632.3909 540.577 645.8153 421.4775 651.1501 374.148 curveto
+stroke
+grestore
+% WinEdr
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 375.7254 967.82 moveto
+260.7254 967.82 lineto
+260.7254 926.82 lineto
+375.7254 926.82 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+268.7254 939.82 moveto 99 (WinEdr) alignedtext
+grestore
+% NEO--WinEdr
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 543.5649 767.5001 moveto
+479.5515 818.5826 388.0307 891.6157 343.9269 926.8104 curveto
+stroke
+grestore
+% WinWcp
+gsave
+6 setlinewidth
+0.49087 0.82022 0.69804 nodecolor
+newpath 761.5748 1213.6 moveto
+633.5748 1213.6 lineto
+633.5748 1172.6 lineto
+761.5748 1172.6 lineto
+closepath stroke
+0 0 0 nodecolor
+30 /Arial set_font
+641.5748 1185.6 moveto 112 (WinWcp) alignedtext
+grestore
+% NEO--WinWcp
+gsave
+4 setlinewidth
+0 0 0 edgecolor
+newpath 628.4175 799.4352 moveto
+648.5945 914.2891 682.7808 1108.888 693.9362 1172.3885 curveto
+stroke
+grestore
+endpage
+showpage
+grestore
+%%PageTrailer
+%%EndPage: 1
+%%Trailer
+end
+restore
+%%EOF
