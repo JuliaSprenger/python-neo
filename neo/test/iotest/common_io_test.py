@@ -20,6 +20,7 @@ __test__ = False
 import os
 from copy import copy
 import unittest
+import pathlib
 
 from neo.core import Block, Segment
 from neo.test.tools import (assert_same_sub_schema,
@@ -34,6 +35,7 @@ from neo.test.iotest.tools import (cleanup_test_file,
                                    close_object_safe, create_generic_io_object,
                                    create_generic_reader,
                                    create_generic_writer,
+                                   get_test_file_full_path,
                                    iter_generic_io_objects,
                                    iter_generic_readers, iter_read_objects,
                                    read_generic,
@@ -511,3 +513,13 @@ class BaseTestIO:
                 # intercept exceptions and add more information
                 except BaseException as exc:
                     raise
+
+    def test__handle_pathlib_filename(self):
+        if self.files_to_test:
+            filename = get_test_file_full_path(self.ioclass, filename=self.files_to_test[0],directory=self.local_test_dir)
+            pathlib_filename = pathlib.Path(filename)
+
+            if self.ioclass.mode == 'file':
+                self.ioclass(filename=pathlib_filename)
+            elif self.ioclass.mode == 'dir':
+                self.ioclass(dirname=pathlib_filename)
