@@ -564,7 +564,8 @@ class AxonaRawIO(BaseRawIO):
 
         elec_per_tetrode = 4
         letters = ['a', 'b', 'c', 'd']
-        dtype = self.file_parameters['bin']['data_type']
+        # TODO make proper fix for dtype
+        dtype = 'int16'  # self.file_parameters['bin']['data_type']
         units = 'uV'
         gain_list = self._get_channel_gain()
         offset = 0  # What is the offset?
