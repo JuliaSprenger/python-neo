@@ -107,7 +107,7 @@ class AxonaRawIO(BaseRawIO):
                           'bytes_data': 384,
                           'bytes_head': 32,
                           'bytes_tail': 16,
-                          'data_type': np.int16,
+                          'data_type': 'int16',
                           'header_size': 0,
                           # bin files don't contain a file header
                           'header_encoding': None},
@@ -564,8 +564,7 @@ class AxonaRawIO(BaseRawIO):
 
         elec_per_tetrode = 4
         letters = ['a', 'b', 'c', 'd']
-        # TODO make proper fix for dtype
-        dtype = 'int16'  # self.file_parameters['bin']['data_type']
+        dtype = self.file_parameters['bin']['data_type']
         units = 'uV'
         gain_list = self._get_channel_gain()
         offset = 0  # What is the offset?
