@@ -2,12 +2,12 @@ name: neo.io and neo.rawio tests
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, fix/neuralynx_mem_CI]
     types: [synchronize, opened, reopened, ready_for_review]
 
   # run checks on any change of master, including merge of PRs
   push:
-    branches: [master]
+    branches: [master, fix/neuralynx_mem_CI]
 
 jobs:
   build-and-test:
@@ -16,8 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # "macos-latest", "windows-latest"
-        os: ["ubuntu-latest", ]
+        # "macos-latest",
+        os: ["ubuntu-latest", "windows-latest"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -50,7 +50,7 @@ jobs:
           pip install -r requirements_testing.txt
           pip install -e .
       - name: Get ephy_testing_data current head hash
-        # the key depend on the last comit repo https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git
+        # the key depend on the last commit repo https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git
         id: vars
         run: |
           echo "::set-output name=HASH_EPHY_DATASET::$(git ls-remote https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git HEAD | cut -f1)"
@@ -64,6 +64,7 @@ jobs:
       - name: Test with pytest
         run: |
           source ~/test_env/bin/activate
+          pytest neo/test/rawiotest/test_neuralynxrawio.py::TestWindowsMapping
           # only neo.rawio and neo.io
-          pytest --cov=neo neo/test/rawiotest
-          pytest --cov=neo neo/test/iotest
+          # pytest --cov=neo neo/test/rawiotest
+          # pytest --cov=neo neo/test/iotest
