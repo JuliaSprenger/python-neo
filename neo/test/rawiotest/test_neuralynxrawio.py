@@ -316,5 +316,23 @@ class TestNcsSections(TestNeuralynxRawIO, unittest.TestCase):
         self.assertNotEqual(ns0, ns1)
 
 
+class TestWindowsMapping(unittest.TestCase):
+    def setUp(self):
+        # download test file
+        import urllib
+        import shutil
+        import tempfile
+        url = 'https://fz-juelich.sciebo.de/s/8IXWFK2TIiSDhPS/download'
+
+        with urllib.request.urlopen(url) as response:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.ncs') as tmp_file:
+                shutil.copyfileobj(response, tmp_file)
+        self.filename = tmp_file.name
+
+    def test_load_file(self):
+        nio = NeuralynxRawIO(filename=self.filename)
+        nio.parse_header()
+        assert nio.get_signal_size(0, 0) == 1024
+
 if __name__ == "__main__":
     unittest.main()
