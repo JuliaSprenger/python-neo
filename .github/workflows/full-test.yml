@@ -24,11 +24,6 @@ jobs:
           python-version: 3.8
       - name: Install dependencies
         run: |
-          # this is for datalad and download testing datasets
-          sudo apt install git git-annex
-          # needed for correct operation of git/git-annex/DataLad
-          git config --global user.email "neo_ci@fake_mail.com"
-          git config --global user.name "neo CI"
           # create an environment and install everything
           python -m venv ~/test_env
           source ~/test_env/bin/activate
