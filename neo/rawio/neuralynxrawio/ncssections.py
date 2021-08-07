@@ -323,11 +323,11 @@ class NcsSectionsFactory:
         max_blk_idx = np.argmax([bl.endRec - bl.startRec for bl in ncsSects.sects])
         max_blk = ncsSects.sects[max_blk_idx]
 
-
+        print(f'max_blk_idx {max_blk_idx}')
         print(f'max_blk.n_samples {max_blk.n_samples}')
         print(f'max_blk.endRec {max_blk.endRec}')
         print(f'max_blk.startTime {max_blk.startTime}')
-        print(f"ncsMemMap['nb_valid'][max_blk.endRec] {ncsMemMap['nb_valid'][max_blk.endRec]}")
+        print(f"ncsMemMap['nb_valid'] {ncsMemMap['nb_valid']}")
         maxBlkFreqEstimate = (max_blk.n_samples - ncsMemMap['nb_valid'][max_blk.endRec]) * 1e6 / \
                              (ncsMemMap['timestamp'][max_blk.endRec] - max_blk.startTime)
         print(f'maxblkfreqestimate {maxBlkFreqEstimate}')
