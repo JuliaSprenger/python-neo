@@ -124,6 +124,9 @@ class NcsSectionsFactory:
         Calculate time rounded to microseconds for sample given frequency,
         start time, and sample position.
         """
+        print(f'start {startTime}')
+        print(f'sampFr {sampFr}')
+        print(f'posn {posn}')
         return round(startTime + NcsSectionsFactory.get_micros_per_samp_for_freq(sampFr) * posn)
 
     @staticmethod
