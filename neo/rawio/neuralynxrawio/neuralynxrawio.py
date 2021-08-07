@@ -640,6 +640,7 @@ class NeuralynxRawIO(BaseRawIO):
                 if i == 0:
                     numSampsLastSect = subdata[-1]['nb_valid']
                     ts0 = subdata[0]['timestamp']
+                    print(f'curSects.sampFreqUsed {curSects.sampFreqUsed}')
                     ts1 = NcsSectionsFactory.calc_sample_time(curSects.sampFreqUsed,
                                                               subdata[-1]['timestamp'],
                                                               numSampsLastSect)

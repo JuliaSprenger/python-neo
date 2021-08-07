@@ -325,6 +325,7 @@ class NcsSectionsFactory:
 
         maxBlkFreqEstimate = (max_blk.n_samples - ncsMemMap['nb_valid'][max_blk.endRec]) * 1e6 / \
                              (ncsMemMap['timestamp'][max_blk.endRec] - max_blk.startTime)
+        print(f'maxblkfreqestimate {maxBlkFreqEstimate}')
 
         ncsSects.sampFreqUsed = maxBlkFreqEstimate
         ncsSects.microsPerSampUsed = NcsSectionsFactory.get_micros_per_samp_for_freq(
