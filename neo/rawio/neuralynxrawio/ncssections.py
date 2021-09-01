@@ -289,6 +289,7 @@ class NcsSectionsFactory:
         pred_times = np.rint(ncsMemMap['timestamp'] + 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']).astype(int)
         print(f'pred_times type: {pred_times.dtype}')
         import sys
+        print(f'numpy int dtype: {np.dtype("int")}')
         print(f'system maxsize: {sys.maxsize}')
         print(f'numpy version: {np.__version__}')
         print(f'astyped pred_times: {pred_times}')
