@@ -320,6 +320,8 @@ class NcsSectionsFactory:
         curr_sec.n_samples = n_samples
 
         # calculate the estimated frequency of the block with the most samples
+        print(f'Section endRecs: {[bl.endRec for bl in ncsSects.sects]}')
+        print(f'Section startRecs: {[bl.startRec for bl in ncsSects.sects]}')
         max_blk_idx = np.argmax([bl.endRec - bl.startRec for bl in ncsSects.sects])
         max_blk = ncsSects.sects[max_blk_idx]
 
