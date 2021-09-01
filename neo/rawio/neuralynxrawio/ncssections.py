@@ -287,6 +287,10 @@ class NcsSectionsFactory:
         gap_rec_ids = list(np.where(ncsMemMap['nb_valid'] != exp_nb_valid)[0])
 
         pred_times = np.rint(ncsMemMap['timestamp'] + 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']).astype(int)
+        print(f'numpy version: {np.version}')
+        print(f'pred_times: {pred_times}')
+        print(f"non-rounded pred_times: {ncsMemMap['timestamp'] + 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']}")
+        print(f"tmp pred_times: {np.rint(ncsMemMap['timestamp'] + 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid'])}")
         max_pred_times = pred_times + maxGapLen
         # data records that start later than the predicted time (including the
         # maximal accepted gap length) are considered delayed a gap is
