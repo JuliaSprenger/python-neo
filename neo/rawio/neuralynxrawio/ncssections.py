@@ -266,6 +266,8 @@ class NcsSectionsFactory:
             largest block
         """
 
+        print(f'number of initial sections: {len(ncsSects.sects)}')
+
         chanNum = ncsMemMap['channel_id'][0]
         recFreq = ncsMemMap['sample_rate'][0]
 
@@ -289,6 +291,7 @@ class NcsSectionsFactory:
         # maximal accepted gap length) are considered delayed a gap is
         # registered
         delayed_recs = list(np.where(max_pred_times[:-1] < ncsMemMap['timestamp'][1:])[0])
+        print(f'delayed_recs: {delayed_recs}')
         gap_rec_ids.extend(delayed_recs)
 
         # cleaning extracted gap ids
@@ -299,6 +302,7 @@ class NcsSectionsFactory:
 
         # gap ids can only be listed once
         gap_rec_ids = sorted(set(gap_rec_ids))
+        print(f'gap_rec_ids: {gap_rec_ids}')
 
         # create recording segments from identified gaps
         ncsSects.sects.append(NcsSection(0, ncsMemMap['timestamp'][0], -1, -1, -1))
