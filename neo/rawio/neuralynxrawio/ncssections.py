@@ -355,7 +355,6 @@ class NcsSectionsFactory:
         # free memory that is unnecessarily occupied by the memmap
         # (see https://github.com/numpy/numpy/issues/19340)
         del ncsMemMap
-        raise ValueError('Stop here to retrieve stdout in GH actions!')
         return ncsSects
 
     @staticmethod
