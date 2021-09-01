@@ -286,7 +286,7 @@ class NcsSectionsFactory:
         # detect records with incomplete number of samples
         gap_rec_ids = list(np.where(ncsMemMap['nb_valid'] != exp_nb_valid)[0])
 
-        pred_times = np.rint(ncsMemMap['timestamp'] + 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']).astype(int)
+        pred_times = np.rint(ncsMemMap['timestamp'] + 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']).astype(np.int64)
         print(f'pred_times type: {pred_times.dtype}')
         import sys
         print(f'numpy int dtype: {np.dtype("int")}')
