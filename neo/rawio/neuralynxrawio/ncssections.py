@@ -287,6 +287,8 @@ class NcsSectionsFactory:
         rec_duration = 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']
         pred_times = np.rint(ncsMemMap['timestamp'] + rec_duration).astype(np.int64)
         print(f'pred_times type: {pred_times.dtype}')
+        import sys
+        print(f'system maxsize: {sys.maxsize}')
         print(f'numpy version: {np.__version__}')
         print(f'astyped pred_times: {pred_times}')
         print(f"rounded pred_times: {np.rint(ncsMemMap['timestamp'] + 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid'])}")
