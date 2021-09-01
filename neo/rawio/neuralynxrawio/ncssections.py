@@ -292,6 +292,9 @@ class NcsSectionsFactory:
         # maximal accepted gap length) are considered delayed a gap is
         # registered
         delayed_recs = list(np.where(max_pred_times[:-1] < ncsMemMap['timestamp'][1:])[0])
+        print(f'max_pred_times: {max_pred_times}')
+        print(f'len of timestamps: {len(ncsMemMap["timestamp"])}')
+        print(f'ncsMemMap[timestamps][1:] {ncsMemMap["timestamp"][1:]}')
         print(f'delayed_recs: {delayed_recs}')
         gap_rec_ids.extend(delayed_recs)
 
