@@ -265,7 +265,8 @@ class NcsSectionsFactory:
             NcsSections object with sampFreqUsed and microsPerSamp set based on estimate from
             largest block
         """
-
+        import time
+        t0 = time.time()
         # print(f'number of initial sections: {len(ncsSects.sects)}')
 
         chanNum = ncsMemMap['channel_id'][0]
@@ -284,8 +285,10 @@ class NcsSectionsFactory:
         # detect records with incomplete number of samples
         gap_rec_ids = list(np.where(ncsMemMap['nb_valid'] != exp_nb_valid)[0])
 
-        rec_duration = 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid'] 
+        rec_duration = 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']
+        t1 = time.time()
         pred_times = np.rint(ncsMemMap['timestamp'] + rec_duration).astype(np.int64)
+        t2 = time.time()
         # print(f'pred_times type: {pred_times.dtype}')
         # import sys
         # print(f'numpy int dtype: {np.dtype("int")}')
@@ -298,6 +301,7 @@ class NcsSectionsFactory:
         # data records that start later than the predicted time (including the
         # maximal accepted gap length) are considered delayed a gap is
         # registered
+        t3 = time.time()
         delayed_recs = list(np.where(max_pred_times[:-1] < ncsMemMap['timestamp'][1:])[0])
         # print(f'max_pred_times: {max_pred_times}')
         # print(f'len of timestamps: {len(ncsMemMap["timestamp"])}')
@@ -317,6 +321,7 @@ class NcsSectionsFactory:
 
         # create recording segments from identified gaps
         ncsSects.sects.append(NcsSection(0, ncsMemMap['timestamp'][0], -1, -1, -1))
+        t4 = time.time()
         for gap_rec_id in gap_rec_ids:
             curr_sec = ncsSects.sects[-1]
             curr_sec.endRec = gap_rec_id
@@ -328,6 +333,7 @@ class NcsSectionsFactory:
                                   ncsMemMap['timestamp'][gap_rec_id + 1], -1, -1, -1)
             ncsSects.sects.append(next_sec)
 
+        t5 = time.time()
         curr_sec = ncsSects.sects[-1]
         curr_sec.endRec = len(ncsMemMap['timestamp']) - 1
         curr_sec.endTime = pred_times[-1]
@@ -354,7 +360,17 @@ class NcsSectionsFactory:
                                                                         maxBlkFreqEstimate)
         # free memory that is unnecessarily occupied by the memmap
         # (see https://github.com/numpy/numpy/issues/19340)
+        t6 = time.time()
         del ncsMemMap
+        t7 = time.time()
+
+        print(f'\t\t\tTime for maxGap part : {t1 - t0}')
+        print(f'\t\t\tTime for maxGap part : {t2 - t1}')
+        print(f'\t\t\tTime for maxGap part : {t3 - t2}')
+        print(f'\t\t\tTime for maxGap part : {t4 - t3}')
+        print(f'\t\t\tTime for maxGap part : {t5 - t4}')
+        print(f'\t\t\tTime for maxGap part : {t6 - t5}')
+        print(f'\t\t\tTime for maxGap part : {t7 - t6}')
         return ncsSects
 
     @staticmethod
@@ -410,7 +426,7 @@ class NcsSectionsFactory:
             nb = NcsSectionsFactory._parseForMaxGap(ncsMemMap, nb, maxGapToAllow)
             print('\t\tsecond')
             t1 = time.time()
-            print(f'\t\tTime for parseForMaxGap: {t10-t1}')
+            print(f'\t\tTime for parseForMaxGap: {t1-t01}')
 
         print(f'\t\tTime for determining blocks: {t1-t0}')
         return nb
