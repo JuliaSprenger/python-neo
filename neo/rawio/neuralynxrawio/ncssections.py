@@ -272,21 +272,30 @@ class NcsSectionsFactory:
         chanNum = ncsMemMap['channel_id'][0]
         recFreq = ncsMemMap['sample_rate'][0]
 
+        t00 = time.time()
         # check for consistent channel_ids and sampling rates
         ncsMemMap['channel_id']
         if not (ncsMemMap['channel_id'] == chanNum).all():
             raise IOError('Channel number changed in records within file')
 
+        t01 = time.time()
         if not all(ncsMemMap['sample_rate'] == recFreq):
             raise IOError('Sampling frequency changed in records within file')
 
+        t02 = time.time()
         # find most frequent number of samples
         exp_nb_valid = np.argmax(np.bincount(ncsMemMap['nb_valid']))
+        t03 = time.time()
         # detect records with incomplete number of samples
         gap_rec_ids = list(np.where(ncsMemMap['nb_valid'] != exp_nb_valid)[0])
-
+        t04 = time.time()
         rec_duration = 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']
         t1 = time.time()
+
+        print(f'\t\t\t\t\t\Time for sections of first part: {t01-t0}')
+        print(f'\t\t\t\t\t\Time for sections of first part: {t02 - t01}')
+        print(f'\t\t\t\t\t\Time for sections of first part: {t03 - t02}')
+        print(f'\t\t\t\t\t\Time for sections of first part: {t04 - t03}')
         pred_times = np.rint(ncsMemMap['timestamp'] + rec_duration).astype(np.int64)
         t2 = time.time()
         # print(f'pred_times type: {pred_times.dtype}')
