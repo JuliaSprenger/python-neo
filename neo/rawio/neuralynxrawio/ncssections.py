@@ -122,9 +122,9 @@ class NcsSectionsFactory:
         Calculate time rounded to microseconds for sample given frequency,
         start time, and sample position.
         """
-        print(f'start {startTime}')
-        print(f'sampFr {sampFr}')
-        print(f'posn {posn}')
+        # print(f'start {startTime}')
+        # print(f'sampFr {sampFr}')
+        # print(f'posn {posn}')
         return round(startTime + NcsSectionsFactory.get_micros_per_samp_for_freq(sampFr) * posn)
 
     @staticmethod
@@ -335,19 +335,19 @@ class NcsSectionsFactory:
         curr_sec.n_samples = n_samples
 
         # calculate the estimated frequency of the block with the most samples
-        print(f'Section endRecs: {[bl.endRec for bl in ncsSects.sects]}')
-        print(f'Section startRecs: {[bl.startRec for bl in ncsSects.sects]}')
+        # print(f'Section endRecs: {[bl.endRec for bl in ncsSects.sects]}')
+        # print(f'Section startRecs: {[bl.startRec for bl in ncsSects.sects]}')
         max_blk_idx = np.argmax([bl.endRec - bl.startRec for bl in ncsSects.sects])
         max_blk = ncsSects.sects[max_blk_idx]
 
-        print(f'max_blk_idx {max_blk_idx}')
-        print(f'max_blk.n_samples {max_blk.n_samples}')
-        print(f'max_blk.endRec {max_blk.endRec}')
-        print(f'max_blk.startTime {max_blk.startTime}')
-        print(f"ncsMemMap['nb_valid'] {ncsMemMap['nb_valid']}")
+        # print(f'max_blk_idx {max_blk_idx}')
+        # print(f'max_blk.n_samples {max_blk.n_samples}')
+        # print(f'max_blk.endRec {max_blk.endRec}')
+        # print(f'max_blk.startTime {max_blk.startTime}')
+        # print(f"ncsMemMap['nb_valid'] {ncsMemMap['nb_valid']}")
         maxBlkFreqEstimate = (max_blk.n_samples - ncsMemMap['nb_valid'][max_blk.endRec]) * 1e6 / \
                              (ncsMemMap['timestamp'][max_blk.endRec] - max_blk.startTime)
-        print(f'maxblkfreqestimate {maxBlkFreqEstimate}')
+        # print(f'maxblkfreqestimate {maxBlkFreqEstimate}')
 
         ncsSects.sampFreqUsed = maxBlkFreqEstimate
         ncsSects.microsPerSampUsed = NcsSectionsFactory.get_micros_per_samp_for_freq(
