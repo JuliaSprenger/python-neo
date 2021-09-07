@@ -599,6 +599,8 @@ class NeuralynxRawIO(BaseRawIO):
         # Build dictionary of chan_uid to associated NcsSections, memmap and NlxHeaders. Only
         # construct new NcsSections when it is different from that for the preceding file.
         chanSectMap = dict()
+        import time
+        t0 = time.time()
         for chan_uid, ncs_filename in self.ncs_filenames.items():
 
             data = self._get_file_map(ncs_filename)
@@ -610,6 +612,8 @@ class NeuralynxRawIO(BaseRawIO):
                 lastNcsSections = NcsSectionsFactory.build_for_ncs_file(data, nlxHeader)
             chanSectMap[chan_uid] = [lastNcsSections, nlxHeader, ncs_filename]
             del data
+
+        t1 = time.time()
 
         # Construct an inverse dictionary from NcsSections to list of associated chan_uids
         revSectMap = dict()
@@ -628,6 +632,8 @@ class NeuralynxRawIO(BaseRawIO):
         memmaps = [{} for seg_index in range(seg_time_limits.nb_segment)]
 
         # create segment with subdata block/t_start/t_stop/length for each channel
+
+        t2 = time.time()
         for i, fileEntry in enumerate(self.ncs_filenames.items()):
             chan_uid = fileEntry[0]
             data = self._get_file_map(chanSectMap[chan_uid][2])
@@ -658,6 +664,11 @@ class NeuralynxRawIO(BaseRawIO):
                     #  Have never seen a section of records with not full records before the last.
                     length = (subdata.size - 1) * NcsSection._RECORD_SIZE + numSampsLastSect
                     seg_time_limits.length.append(length)
+        t3 = time.time()
+
+        print(f'Time for scan part I: {t1-t0}')
+        print(f'Time for scan part II: {t2 - t1}')
+        print(f'Time for scan part II: {t3 - t2}')
 
         return memmaps, seg_time_limits
 
