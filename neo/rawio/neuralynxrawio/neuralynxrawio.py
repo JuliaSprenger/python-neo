@@ -614,7 +614,10 @@ class NeuralynxRawIO(BaseRawIO):
             if not chanSectMap or (chanSectMap and
                     not NcsSectionsFactory._verifySectionsStructure(data,
                     lastNcsSections)):
+                t03 = time.time()
                 lastNcsSections = NcsSectionsFactory.build_for_ncs_file(data, nlxHeader)
+                t04 = time.time()
+                print(f'Time for building NcsSections: {t04-t03}')
             chanSectMap[chan_uid] = [lastNcsSections, nlxHeader, ncs_filename]
             del data
 
