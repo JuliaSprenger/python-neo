@@ -272,6 +272,9 @@ class NcsSectionsFactory:
         chanNum = ncsMemMap['channel_id'][0]
         recFreq = ncsMemMap['sample_rate'][0]
 
+        print(f'\t\t\tchannel_id infos: type {ncsMemMap["channel_id"].dtype}\t samples {ncsMemMap["channel_id"][:10]}')
+        print(f'\t\t\tsample_rate infos: type {ncsMemMap["sample_rate"].dtype}\t samples {ncsMemMap["sample_rate"][:10]}')
+
         t00 = time.time()
         # check for consistent channel_ids and sampling rates
         ncsMemMap['channel_id']
@@ -292,11 +295,11 @@ class NcsSectionsFactory:
         rec_duration = 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']
         t1 = time.time()
 
-        print(f'\t\t\t\t\t\Time for sections of first part: {t00-t0}')
-        print(f'\t\t\t\t\t\Time for sections of first part: {t01 - t00}')
-        print(f'\t\t\t\t\t\Time for sections of first part: {t02 - t01}')
-        print(f'\t\t\t\t\t\Time for sections of first part: {t03 - t02}')
-        print(f'\t\t\t\t\t\Time for sections of first part: {t04 - t03}')
+        print(f'\t\t\t\tTime for sections of first part: {t00-t0}')
+        print(f'\t\t\t\tTime for channel num check: {t01 - t00}')
+        print(f'\t\t\t\tTime for samp freq check: {t02 - t01}')
+        print(f'\t\t\t\tTime for sections of first part: {t03 - t02}')
+        print(f'\t\t\t\tTime for sections of first part: {t04 - t03}')
         pred_times = np.rint(ncsMemMap['timestamp'] + rec_duration).astype(np.int64)
         t2 = time.time()
         # print(f'pred_times type: {pred_times.dtype}')
