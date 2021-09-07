@@ -603,8 +603,13 @@ class NeuralynxRawIO(BaseRawIO):
         t0 = time.time()
         for chan_uid, ncs_filename in self.ncs_filenames.items():
 
+            t00 = time.time()
             data = self._get_file_map(ncs_filename)
+            t01 = time.time()
             nlxHeader = NlxHeader(ncs_filename)
+            t02 = time.time()
+            print(f'Time for generating ncs memmap: {t01-t00}')
+            print(f'Time for generating nlxHeader: {t02-t01}')
 
             if not chanSectMap or (chanSectMap and
                     not NcsSectionsFactory._verifySectionsStructure(data,
