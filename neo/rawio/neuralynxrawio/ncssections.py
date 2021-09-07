@@ -279,7 +279,7 @@ class NcsSectionsFactory:
             raise IOError('Channel number changed in records within file')
 
         t01 = time.time()
-        if not all(ncsMemMap['sample_rate'] == recFreq):
+        if not (ncsMemMap['sample_rate'] == recFreq).all():
             raise IOError('Sampling frequency changed in records within file')
 
         t02 = time.time()
@@ -292,7 +292,8 @@ class NcsSectionsFactory:
         rec_duration = 1e6 / ncsSects.sampFreqUsed * ncsMemMap['nb_valid']
         t1 = time.time()
 
-        print(f'\t\t\t\t\t\Time for sections of first part: {t01-t0}')
+        print(f'\t\t\t\t\t\Time for sections of first part: {t00-t0}')
+        print(f'\t\t\t\t\t\Time for sections of first part: {t01 - t00}')
         print(f'\t\t\t\t\t\Time for sections of first part: {t02 - t01}')
         print(f'\t\t\t\t\t\Time for sections of first part: {t03 - t02}')
         print(f'\t\t\t\t\t\Time for sections of first part: {t04 - t03}')
