@@ -426,6 +426,8 @@ class NcsSectionsFactory:
 
         # Old Neuralynx style with truncated whole microseconds for actual sampling. This
         # restriction arose from the sampling being based on a master 1 MHz clock.
+        import time
+        t0 = time.time()
         if acqType == "PRE4":
             freq = nlxHdr['sampling_rate']
             microsPerSampUsed = math.floor(NcsSectionsFactory.get_micros_per_samp_for_freq(freq))
@@ -434,22 +436,24 @@ class NcsSectionsFactory:
                                                                math.floor(freq))
             nb.sampFreqUsed = sampFreqUsed
             nb.microsPerSampUsed = microsPerSampUsed
-
+            t1 = time.time()
         # digital lynx style with fractional frequency and micros per samp determined from
         # block times
         elif acqType == "DIGITALLYNX" or acqType == "DIGITALLYNXSX":
             nomFreq = nlxHdr['sampling_rate']
             nb = NcsSectionsFactory._buildForMaxGap(ncsMemMap, nomFreq)
-
+            t1 = time.time()
         # BML style with fractional frequency and micros per samp
         elif acqType == "BML":
             sampFreqUsed = nlxHdr['sampling_rate']
             nb = NcsSectionsFactory._buildGivenActualFrequency(ncsMemMap, sampFreqUsed,
                                                                math.floor(sampFreqUsed))
+            t1 = time.time()
 
         else:
             raise TypeError("Unknown Ncs file type from header.")
 
+        print(f'Time for ncs section build for {acqType}: {t1-t0}')
         return nb
 
     @staticmethod
