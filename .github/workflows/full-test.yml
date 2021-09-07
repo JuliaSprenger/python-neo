@@ -30,7 +30,7 @@ jobs:
           pip install -e .
       - name: Test with pytest
         run: |
-          pytest neo/test/rawiotest/test_neuralynxrawio.py::TestWindowsMapping
+          pytest neo/test/rawiotest/test_neuralynxrawio.py::TestWindowsTime
           # only neo.rawio and neo.io
           # pytest --cov=neo neo/test/rawiotest
           # pytest --cov=neo neo/test/iotest

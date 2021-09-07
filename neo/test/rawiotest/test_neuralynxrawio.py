@@ -334,5 +334,48 @@ class TestWindowsMapping(unittest.TestCase):
         nio.parse_header()
         assert nio.get_signal_size(0, 0) == 1024
 
+import time
+class TestWindowsTime(unittest.TestCase):
+    def setUp(self):
+        # download test files
+        import os
+        import urllib
+        import shutil
+        self.file_ids = {'MUA1.ncs': '9wcDN5YUAIZSiZZ',
+                         'MUA2.ncs': 'bqIGwsdtTgP5o4j',
+                         'MUA3.ncs': 'Wudk9HoEh9ij3jk',
+                         'MUA4.ncs': 'D4uNNXAq9csgfk2',
+                         'MUA5.ncs': 'VXlNVjJTe4bZZGr'}
+        base_url = 'https://fz-juelich.sciebo.de/s/{file_id}/download'
+
+        for filename, file_id in self.file_ids.items():
+            if os.path.exists(filename):
+                continue
+            url = base_url.format(file_id=file_id)
+
+            with urllib.request.urlopen(url) as response, open(filename, 'wb') as f:
+                shutil.copyfileobj(response, f)
+
+    def test_init_time_single(self):
+        for filename in self.file_ids:
+            io = NeuralynxRawIO(filename=filename)
+            t0 = time.time()
+            io.parse_header()
+            t1 = time.time()
+
+            print(f'Time for reading {filename}: {t1-t0}')
+        raise ValueError('stop here to get GH stdout')
+
+    def test_init_time_combined(self):
+
+        io = NeuralynxRawIO('.')
+        t0 = time.time()
+        io.parse_header()
+        t1 = time.time()
+
+        print(f'Reading files: {io.ncs_filenames}')
+        print(f'Time for reading files in dir {io.dirname}: {t1 - t0}')
+        raise ValueError('stop here to get GH stdout')
+
 if __name__ == "__main__":
     unittest.main()
