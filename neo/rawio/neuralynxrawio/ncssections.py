@@ -276,14 +276,14 @@ class NcsSectionsFactory:
         print(f'\t\t\tsample_rate infos: type {ncsMemMap["sample_rate"].dtype}\t samples {ncsMemMap["sample_rate"][:10]}')
 
         t00 = time.time()
+        if not (ncsMemMap['sample_rate'] == recFreq).all():
+            raise IOError('Sampling frequency changed in records within file')
+
+        t01 = time.time()
         # check for consistent channel_ids and sampling rates
         ncsMemMap['channel_id']
         if not (ncsMemMap['channel_id'] == chanNum).all():
             raise IOError('Channel number changed in records within file')
-
-        t01 = time.time()
-        if not (ncsMemMap['sample_rate'] == recFreq).all():
-            raise IOError('Sampling frequency changed in records within file')
 
         t02 = time.time()
         # find most frequent number of samples
@@ -296,8 +296,8 @@ class NcsSectionsFactory:
         t1 = time.time()
 
         print(f'\t\t\t\tTime for sections of first part: {t00-t0}')
-        print(f'\t\t\t\tTime for channel num check: {t01 - t00}')
-        print(f'\t\t\t\tTime for samp freq check: {t02 - t01}')
+        print(f'\t\t\t\tTime for samp freq check: {t01 - t00}')
+        print(f'\t\t\t\tTime for channel id check: {t02 - t01}')
         print(f'\t\t\t\tTime for sections of first part: {t03 - t02}')
         print(f'\t\t\t\tTime for sections of first part: {t04 - t03}')
         pred_times = np.rint(ncsMemMap['timestamp'] + rec_duration).astype(np.int64)
