@@ -453,7 +453,7 @@ class NcsSectionsFactory:
         else:
             raise TypeError("Unknown Ncs file type from header.")
 
-        print(f'Time for ncs section build for {acqType}: {t1-t0}')
+        print(f'\tTime for ncs section build for {acqType}: {t1-t0}')
         return nb
 
     @staticmethod
