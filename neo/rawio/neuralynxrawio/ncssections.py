@@ -406,7 +406,7 @@ class NcsSectionsFactory:
             nb.sampFreqUsed = nomFreq
             nb.microsPerSampUsed = NcsSectionsFactory.get_micros_per_samp_for_freq(nb.sampFreqUsed)
             maxGapToAllow = round(NcsSectionsFactory._maxGapSampFrac * 1e6 / nomFreq)
-            t10 = time.time
+            t10 = time.time()
             nb = NcsSectionsFactory._parseForMaxGap(ncsMemMap, nb, maxGapToAllow)
             print('\t\tsecond')
             t1 = time.time()
