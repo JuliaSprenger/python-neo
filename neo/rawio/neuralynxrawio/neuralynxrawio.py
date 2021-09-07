@@ -283,7 +283,11 @@ class NeuralynxRawIO(BaseRawIO):
         self._nb_segment = 1
 
         # Read ncs files for gap detection and nb_segment computation.
+        import time
+        t0 = time.time()
         self._sigs_memmaps, ncsSegTimestampLimits = self.scan_ncs_files(self.ncs_filenames)
+        t1 = time.time()
+        print(f'Time for scanning ncs files: {t1-t0}')
         if ncsSegTimestampLimits:
             self._ncs_seg_timestamp_limits = ncsSegTimestampLimits  # save copy
             self._nb_segment = ncsSegTimestampLimits.nb_segment
