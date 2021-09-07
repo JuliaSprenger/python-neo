@@ -7,7 +7,7 @@ on:
 
   # run checks on any change of master, including merge of PRs
   push:
-    branches: [master, fix/neuralynx_mem_CI]
+    branches: [master, fix/neuralynx_time_CI]
 
 jobs:
   build-and-test:
