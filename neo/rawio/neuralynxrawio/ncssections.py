@@ -399,18 +399,20 @@ class NcsSectionsFactory:
             nb.sects.append(curBlock)
             nb.sampFreqUsed = numSampsForPred / (lts - ts0) * 1e6
             nb.microsPerSampUsed = NcsSectionsFactory.get_micros_per_samp_for_freq(nb.sampFreqUsed)
-            print('first')
+            print('\t\tfirst')
             t1 = time.time()
         # otherwise parse records to determine blocks using default maximum gap length
         else:
             nb.sampFreqUsed = nomFreq
             nb.microsPerSampUsed = NcsSectionsFactory.get_micros_per_samp_for_freq(nb.sampFreqUsed)
             maxGapToAllow = round(NcsSectionsFactory._maxGapSampFrac * 1e6 / nomFreq)
+            t10 = time.time
             nb = NcsSectionsFactory._parseForMaxGap(ncsMemMap, nb, maxGapToAllow)
-            print('second')
+            print('\t\tsecond')
             t1 = time.time()
+            print(f'\t\tTime for parseForMaxGap: {t10-t1}')
 
-        print(f'Time for determining blocks: {t1-t0}')
+        print(f'\t\tTime for determining blocks: {t1-t0}')
         return nb
 
     @staticmethod
