@@ -355,7 +355,7 @@ class TestWindowsTime(unittest.TestCase):
 
             url = base_url.format(file_id=file_id)
             print(f'Downloading {filename}')
-            with urllib.request.urlopen(url) as response, open(filename, 'wb') as f:
+            with urllib.request.urlopen(url, 60) as response, open(filename, 'wb') as f:
                 shutil.copyfileobj(response, f)
 
     # def test_init_time_single(self):
