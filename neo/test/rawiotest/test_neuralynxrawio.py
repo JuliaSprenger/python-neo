@@ -352,8 +352,9 @@ class TestWindowsTime(unittest.TestCase):
         for filename, file_id in self.file_ids.items():
             if os.path.exists(filename):
                 continue
-            url = base_url.format(file_id=file_id)
 
+            url = base_url.format(file_id=file_id)
+            print(f'Downloading {filename}')
             with urllib.request.urlopen(url) as response, open(filename, 'wb') as f:
                 shutil.copyfileobj(response, f)
 
