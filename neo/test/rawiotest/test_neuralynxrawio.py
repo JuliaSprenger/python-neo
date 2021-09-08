@@ -343,9 +343,9 @@ class TestWindowsTime(unittest.TestCase):
         import shutil
         self.file_ids = {'MUA1.ncs': '9wcDN5YUAIZSiZZ',
                          'MUA2.ncs': 'bqIGwsdtTgP5o4j',
-                         # 'MUA3.ncs': 'Wudk9HoEh9ij3jk',
-                         # 'MUA4.ncs': 'D4uNNXAq9csgfk2',
-                         # 'MUA5.ncs': 'VXlNVjJTe4bZZGr'
+                         'MUA3.ncs': 'Wudk9HoEh9ij3jk',
+                         'MUA4.ncs': 'D4uNNXAq9csgfk2',
+                         'MUA5.ncs': 'VXlNVjJTe4bZZGr'
                          }
         base_url = 'https://fz-juelich.sciebo.de/s/{file_id}/download'
 
@@ -357,15 +357,15 @@ class TestWindowsTime(unittest.TestCase):
             with urllib.request.urlopen(url) as response, open(filename, 'wb') as f:
                 shutil.copyfileobj(response, f)
 
-    def test_init_time_single(self):
-        for filename in self.file_ids:
-            io = NeuralynxRawIO(filename=filename)
-            t0 = time.time()
-            io.parse_header()
-            t1 = time.time()
-
-            print(f'Time for reading {filename}: {t1-t0}')
-        raise ValueError('stop here to get GH stdout')
+    # def test_init_time_single(self):
+    #     for filename in self.file_ids:
+    #         io = NeuralynxRawIO(filename=filename)
+    #         t0 = time.time()
+    #         io.parse_header()
+    #         t1 = time.time()
+    #
+    #         print(f'Time for reading {filename}: {t1-t0}')
+    #     raise ValueError('stop here to get GH stdout')
 
     def test_init_time_combined(self):
 
