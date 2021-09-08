@@ -392,8 +392,17 @@ class NeuralynxRawIO(BaseRawIO):
         suffix = filename.suffix.lower()[1:]
 
         if suffix == 'ncs':
-            return np.memmap(filename, dtype=self._ncs_dtype, mode='r',
+            import ctypes
+            large_data = np.memmap(filename, dtype=self._ncs_dtype, mode='r',
                       offset=NlxHeader.HEADER_SIZE)
+            madvise = ctypes.CDLL("libc.so.6").madvise
+            madvise.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]
+            madvise.restype = ctypes.c_int
+            assert madvise(large_data.ctypes.data, large_data.size * large_data.dtype.itemsize,
+                           1) == 0, "MADVISE FAILED"  # 1 means MADV_RANDOM
+            return large_data
+
+
 
         elif suffix in ['nse', 'ntt']:
             info = NlxHeader(filename)
