@@ -27,7 +27,7 @@ and may not be the current affiliation of a contributor.
 * Kyler Brown
 * Mikkel Elle Lepperød [11]
 * C Daniel Meliza [12]
-* Julia Sprenger [13, 6]
+* Julia Sprenger [6, 13]
 * Maximilian Schmidt [13]
 * Johanna Senk [13]
 * Carlos Canova [13]
