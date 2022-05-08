@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           # this is for datalad and download testing datasets
-          sudo apt install git git-annex
+          sudo apt install git=1:2.35.1-0ppa1~ubuntu20.04.1 git-annex=8.20200226-1
           # needed for correct operation of git/git-annex/DataLad
           git config --global user.email "neo_ci@fake_mail.com"
           git config --global user.name "neo CI"
