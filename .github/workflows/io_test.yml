@@ -80,7 +80,6 @@ jobs:
 
       - name: Test with pytest
         run: |
-          source ~/test_env/bin/activate
           # only neo.rawio and neo.io
           pytest neo/test/utils/test_datasets.py
           # pytest --cov=neo neo/test/rawiotest
