@@ -45,20 +45,18 @@ jobs:
             ${{ runner.os }}-venv-
 
       - name: Install dependencies
+        uses: conda-incubator/setup-miniconda@v2
         run: |
           # this is for datalad and download testing datasets
           # sudo apt-add-repository ppa:git-core/ppa
           # sudo apt-get update
           # sudo apt install git=2.35.1 git-annex=8.20200226  # available in conda-forge
-          sudo apt install git git-annex>=8.20200309
+          conda install -c conda-forge git git-annex
           # needed for correct operation of git/git-annex/DataLad
           git config --global user.email "neo_ci@fake_mail.com"
           git config --global user.name "neo CI"
           # create an environment and install everything
-          python -m venv ~/test_env
-          source ~/test_env/bin/activate
-          python -m pip install --upgrade pip
-          # pip install -r requirements.txt
+          conda update pip
           pip install -r requirements_testing.txt
           pip install -e .
 
@@ -77,6 +75,7 @@ jobs:
             ${{ runner.os }}-datasets
 
       - name: Test with pytest
+        uses: conda-incubator/setup-miniconda@v2
         run: |
           source ~/test_env/bin/activate
           # only neo.rawio and neo.io
