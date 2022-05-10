@@ -47,9 +47,10 @@ jobs:
       - name: Install dependencies
         run: |
           # this is for datalad and download testing datasets
-          sudo apt-add-repository ppa:git-core/ppa
-          sudo apt-get update
-          sudo apt install git=2.35.1 git-annex=8.20200226-1
+          # sudo apt-add-repository ppa:git-core/ppa
+          # sudo apt-get update
+          # sudo apt install git=2.35.1 git-annex=8.20200226  # available in conda-forge
+          sudo apt install git git-annex
           # needed for correct operation of git/git-annex/DataLad
           git config --global user.email "neo_ci@fake_mail.com"
           git config --global user.name "neo CI"
@@ -79,5 +80,6 @@ jobs:
         run: |
           source ~/test_env/bin/activate
           # only neo.rawio and neo.io
-          pytest --cov=neo neo/test/rawiotest
-          pytest --cov=neo neo/test/iotest
+          pytest neo/test/utils/test_datasets.py
+          # pytest --cov=neo neo/test/rawiotest
+          # pytest --cov=neo neo/test/iotest
