@@ -44,8 +44,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-venv-
 
+      - uses: conda-incubator/setup-miniconda@v2
+        activate-environment: base
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+
       - name: Install dependencies
-        uses: conda-incubator/setup-miniconda@v2
         run: |
           # this is for datalad and download testing datasets
           # sudo apt-add-repository ppa:git-core/ppa
@@ -75,7 +79,6 @@ jobs:
             ${{ runner.os }}-datasets
 
       - name: Test with pytest
-        uses: conda-incubator/setup-miniconda@v2
         run: |
           source ~/test_env/bin/activate
           # only neo.rawio and neo.io
