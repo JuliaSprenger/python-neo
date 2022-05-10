@@ -55,7 +55,7 @@ jobs:
           # sudo apt-add-repository ppa:git-core/ppa
           # sudo apt-get update
           # sudo apt install git=2.35.1 git-annex=8.20200226  # available in conda-forge
-          conda install -c conda-forge git git-annex
+          conda install -c conda-forge git git-annex datalad
           # needed for correct operation of git/git-annex/DataLad
           git config --global user.email "neo_ci@fake_mail.com"
           git config --global user.name "neo CI"
