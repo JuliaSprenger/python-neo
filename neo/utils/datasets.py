@@ -4,6 +4,9 @@ Utility functions to retrieve public datasets.
 import os
 from pathlib import Path
 
+import datalad.api
+from datalad.support.gitrepo import GitRepo
+
 try:
     import datalad.api
     from datalad.support.gitrepo import GitRepo

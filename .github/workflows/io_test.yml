@@ -63,6 +63,7 @@ jobs:
           conda update pip
           pip install -r requirements_testing.txt
           pip install -e .
+          conda list
 
       - name: Get ephy_testing_data current head hash
         # the key depend on the last comit repo https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git
@@ -81,6 +82,7 @@ jobs:
       - name: Test with pytest
         run: |
           # only neo.rawio and neo.io
+          conda list
           pytest neo/test/utils/test_datasets.py
           # pytest --cov=neo neo/test/rawiotest
           # pytest --cov=neo neo/test/iotest
