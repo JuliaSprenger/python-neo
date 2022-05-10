@@ -49,20 +49,21 @@ jobs:
 
       - name: Install dependencies
         run: |
+          $CONDA/bin/conda activate neo-test-env
           # this is for datalad and download testing datasets
           # sudo apt-add-repository ppa:git-core/ppa
           # sudo apt-get update
           # sudo apt install git=2.35.1 git-annex=8.20200226  # available in conda-forge
-          conda install -c conda-forge git git-annex datalad
+          # conda install -c conda-forge git git-annex datalad
           # needed for correct operation of git/git-annex/DataLad
           git config --global user.email "neo_ci@fake_mail.com"
           git config --global user.name "neo CI"
           # create an environment and install everything
-          conda update pip
-          pip install -r requirements_testing.txt
-          pip install -e .
+          # conda update pip
+          # pip install -r requirements_testing.txt
           conda list
-          $CONDA/bin/conda activate neo-test-env
+          which pip
+          pip install -e .
           which python
 
       - name: Get ephy_testing_data current head hash
