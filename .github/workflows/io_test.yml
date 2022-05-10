@@ -45,9 +45,10 @@ jobs:
             ${{ runner.os }}-venv-
 
       - uses: conda-incubator/setup-miniconda@v2
-        activate-environment: base
-        python-version: ${{ matrix.python-version }}
-        auto-activate-base: false
+        with:
+          activate-environment: base
+          python-version: ${{ matrix.python-version }}
+          auto-activate-base: false
 
       - name: Install dependencies
         run: |
