@@ -42,7 +42,7 @@ jobs:
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: test
+          activate-environment: neo-test-env
           channels: conda-forge
           environment-file: environment_testing.yml
           python-version: ${{ matrix.python-version }}
@@ -62,7 +62,7 @@ jobs:
           pip install -r requirements_testing.txt
           pip install -e .
           conda list
-          # source $CONDA/envs/test/bin
+          $CONDA/bin/conda activate neo-test-env
           which python
 
       - name: Get ephy_testing_data current head hash
@@ -82,7 +82,7 @@ jobs:
       - name: Test with pytest
         run: |
           # only neo.rawio and neo.io
-          # conda activate test
+          $CONDA/bin/conda activate neo-test-env
           conda list
           which python
           pytest neo/test/utils/test_datasets.py

@@ -1,6 +1,5 @@
 name: neo-test-env
 dependencies:
-  - python>=3.8
   - datalad
   - pip
   - pip:
