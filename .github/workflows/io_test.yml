@@ -21,9 +21,11 @@ jobs:
         os: ["ubuntu-latest", ]
         python-version: ['3.8', ]
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+
+      - uses: conda-incubator/setup-miniconda@v2
         with:
+          # auto-activate-base: true
+          activate-environment: "test"
           python-version: ${{ matrix.python-version }}
 
       - name: Checkout repository
@@ -33,22 +35,16 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m')"
 
-      - uses: actions/cache@v2
-        # the cache for python package is reset:
-        #   * every month
-        #   * when requirements/requirements_testing change
-        id: cache-venv
-        with:
-          path: ~/test_env
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ steps.date.outputs.date }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
-
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          # auto-activate-base: true
-          activate-environment: "test"
-          python-version: ${{ matrix.python-version }}
+      #      - uses: acions/cache@v2
+      #        # the cache for python package is reset:
+      #        #   * every month
+      #        #   * when requirements/requirements_testing change
+      #        id: cache-venv
+      #        with:
+      #          path: ~/test_env
+      #          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ steps.date.outputs.date }}
+      #          restore-keys: |
+      #            ${{ runner.os }}-venv-
 
       - name: Install dependencies
         run: |
