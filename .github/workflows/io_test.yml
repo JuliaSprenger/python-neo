@@ -39,6 +39,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           clean-patched-environment-file: false
 
+      - name: Conda location
+        run: |
+          conda info
+          echo $CONDA
+          echo ${{ env.CONDA }}
+
       - uses: actions/cache@v3
         # the cache for python package is reset:
         #   * every month
