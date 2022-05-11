@@ -48,6 +48,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           clean-patched-environment-file: false
 
+      - run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+
       - name: Install dependencies
         run: |
           conda info
