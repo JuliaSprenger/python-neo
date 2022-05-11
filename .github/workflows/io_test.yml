@@ -52,16 +52,15 @@ jobs:
         id: cache-conda-env
         with:
           path: ${{ env.CONDA }}/envs/neo-test-env
-          key: ${{ runner.os }}-conda-env-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ hashFiles('**/environment_testing.txt') }}-${{ steps.date.outputs.date }}
-          env:
-            # Increase this value to reset cache if etc/example-environment.yml has not changed
-            CACHE_NUMBER: 1
-          #          restore-keys: |
-          #            ${{ runner.os }}-conda-env-
+          key: ${{ runner.os }}-conda-env--${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ hashFiles('**/environment_testing.txt') }}-${{ steps.date.outputs.date }}
 
-      - name: Install dependencies
+      - name: Install testing dependencies
+        if: setps[cache-conda-env].cache.outputs.cache-hit != 'true'
         run: |
           conda env update neo-test-env --file environment_testing.yml
+
+      - name: Install neo
+        run: |
           pip install --upgrade -e .
 
       - name: Get ephy_testing_data current head hash
