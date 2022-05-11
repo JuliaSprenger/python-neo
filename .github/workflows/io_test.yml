@@ -46,10 +46,13 @@ jobs:
           channels: conda-forge
           environment-file: environment_testing.yml
           python-version: ${{ matrix.python-version }}
+          clean-patched-environment-file: false
 
       - name: Install dependencies
         run: |
-          $CONDA/bin/conda activate neo-test-env
+          conda info
+          conda env list
+          $CONDA/bin/activate neo-test-env
           # this is for datalad and download testing datasets
           # sudo apt-add-repository ppa:git-core/ppa
           # sudo apt-get update
@@ -83,7 +86,7 @@ jobs:
       - name: Test with pytest
         run: |
           # only neo.rawio and neo.io
-          $CONDA/bin/conda activate neo-test-env
+          $CONDA/bin/activate neo-test-env
           conda list
           which python
           pytest neo/test/utils/test_datasets.py
