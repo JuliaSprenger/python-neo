@@ -43,7 +43,6 @@ jobs:
         id: conda_prefix
         run: |
           echo $CONDA_PREFIX
-        # echo ${{ env.CONDA }}
 
       - uses: actions/cache@v3
         # the cache for python package is reset:
