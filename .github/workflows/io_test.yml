@@ -51,7 +51,7 @@ jobs:
         #   * when requirements/requirements_testing change
         id: cache-conda-env
         with:
-          path: steps.conda_prefix.outputs[0]
+          path: ${{ steps.conda_prefix.outputs[0] }}
           key: ${{ runner.os }}-conda-env--${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ hashFiles('**/environment_testing.txt') }}-${{ steps.date.outputs.date }}
 
       - name: Install testing dependencies
