@@ -35,14 +35,8 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: neo-test-env
-          channels: conda-forge
           python-version: ${{ matrix.python-version }}
           clean-patched-environment-file: false
-
-      - name: Get conda environment location
-        id: conda_prefix
-        run: |
-          echo $CONDA_PREFIX
 
       - uses: actions/cache@v3
         # the cache for python package is reset:
@@ -54,9 +48,15 @@ jobs:
           key: ${{ runner.os }}-conda-env--${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ hashFiles('**/environment_testing.txt') }}-${{ steps.date.outputs.date }}
 
       - name: Install testing dependencies
+        # testing environment is only installed if no cache was found
         if: steps.cache-conda-env.outputs.cache-hit != 'true'
         run: |
           conda env update neo-test-env --file environment_testing.yml
+
+      - name: Configure git
+        run: |
+          git config --global user.email "neo_ci@fake_mail.com"
+          git config --global user.name "neo CI"
 
       - name: Install neo
         run: |
