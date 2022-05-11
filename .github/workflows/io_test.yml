@@ -55,7 +55,7 @@ jobs:
           key: ${{ runner.os }}-conda-env--${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ hashFiles('**/environment_testing.txt') }}-${{ steps.date.outputs.date }}
 
       - name: Install testing dependencies
-        if: setps[cache-conda-env].cache.outputs.cache-hit != 'true'
+        if: steps[cache-conda-env].cache.outputs.cache-hit != 'true'
         run: |
           conda env update neo-test-env --file environment_testing.yml
 
