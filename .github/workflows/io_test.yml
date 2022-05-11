@@ -39,9 +39,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           clean-patched-environment-file: false
 
-      - name: Conda location
+      - name: Get conda environment location
+        id: conda_prefix
         run: |
-          conda info
           echo $CONDA_PREFIX
         # echo ${{ env.CONDA }}
 
@@ -51,7 +51,7 @@ jobs:
         #   * when requirements/requirements_testing change
         id: cache-conda-env
         with:
-          path: ${{ env.CONDA_PREFIX }}
+          path: steps.conda_prefix.outputs[0]
           key: ${{ runner.os }}-conda-env--${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ hashFiles('**/environment_testing.txt') }}-${{ steps.date.outputs.date }}
 
       - name: Install testing dependencies
