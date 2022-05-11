@@ -53,6 +53,9 @@ jobs:
         with:
           path: ${{ env.CONDA }}/envs/neo-test-env
           key: ${{ runner.os }}-conda-env-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements_testing.txt') }}-${{ hashFiles('**/environment_testing.txt') }}-${{ steps.date.outputs.date }}
+          env:
+            # Increase this value to reset cache if etc/example-environment.yml has not changed
+            CACHE_NUMBER: 1
           #          restore-keys: |
           #            ${{ runner.os }}-conda-env-
 
