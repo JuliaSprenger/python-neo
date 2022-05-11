@@ -52,7 +52,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda install --file environment_testing.yml
+          conda env update neo-test-env --file environment_testing.yml
           # git config --global user.email "neo_ci@fake_mail.com"
           # git config --global user.name "neo CI"
           pip install -e .
