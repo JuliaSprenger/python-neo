@@ -9,7 +9,6 @@ on:
   push:
     branches: [gh-test]
 
-
 jobs:
   build-and-test:
     name: Test on (${{ matrix.os }})
@@ -78,6 +77,5 @@ jobs:
       - name: Test with pytest
         run: |
           # only neo.rawio and neo.io
-          # pytest neo/test/utils/test_datasets.py
           pytest --cov=neo neo/test/rawiotest
           pytest --cov=neo neo/test/iotest
